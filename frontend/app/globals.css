@@ -194,3 +194,7 @@ canvas { max-width: 100%; }
   .tag-live::before { animation: none; }
   .tick-flash::after { animation: none; }
 }
+
+@media (max-width: 640px) {
+  .ponzi-grid { grid-template-columns: 1fr !important; }
+}

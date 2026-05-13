@@ -324,6 +324,62 @@ export default function PensionesPage() {
         ))}
       </div>
 
+      {/* ── ¿ES UN ESQUEMA PONZI? ─────────────────────────────────────── */}
+      <div style={{ marginBottom: 48, border: '1px solid var(--card-border)', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', background: 'color-mix(in srgb, #e74c3c 8%, var(--card))', borderBottom: '1px solid var(--card-border)' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#e74c3c', marginBottom: 6 }}>Análisis estructural</div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>¿Es el sistema de pensiones un esquema Ponzi?</h2>
+        </div>
+        <div style={{ padding: '24px', background: 'var(--card)' }}>
+          <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--muted-strong)', margin: '0 0 20px' }}>
+            La comparación no es un insulto político: fue el propio Premio Nobel de Economía <strong>Paul Samuelson</strong> quien la hizo en 1967,
+            llamando al sistema de reparto un <em>«actuarial Ponzi scheme»</em> en su artículo <em>An Exact Consumption-Loan Model</em>.
+            Lo decía en sentido técnico, no peyorativo. Analizamos las similitudes y las diferencias clave.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }} className="ponzi-grid">
+            {/* Similitudes */}
+            <div style={{ background: 'color-mix(in srgb, #e74c3c 6%, var(--background))', border: '1px solid color-mix(in srgb, #e74c3c 25%, transparent)', borderRadius: 6, padding: '18px 20px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#e74c3c', textTransform: 'uppercase', marginBottom: 12 }}>⚠ Similitudes con un Ponzi</div>
+              <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: 13, color: 'var(--muted-strong)', lineHeight: 1.75 }}>
+                <li>Los cotizantes actuales pagan a los jubilados actuales — <strong>no hay capitalización</strong> de tus contribuciones.</li>
+                <li>El sistema requiere un flujo continuo de nuevos participantes (trabajadores jóvenes) para sostenerse.</li>
+                <li>La rentabilidad prometida depende del crecimiento de la masa salarial, no de inversiones reales.</li>
+                <li>Con el ratio cotizantes/pensionistas cayendo de 6,0 a 2,54, el sistema necesita aportes externos crecientes — igual que un Ponzi que pierde masa crítica.</li>
+                <li>El Fondo de Reserva (la «hucha») pasó de 67.000 M€ en 2011 a ~4.400 M€ en 2024: se consumió para pagar prestaciones, no como inversión.</li>
+              </ul>
+            </div>
+
+            {/* Diferencias */}
+            <div style={{ background: 'color-mix(in srgb, #27ae60 6%, var(--background))', border: '1px solid color-mix(in srgb, #27ae60 25%, transparent)', borderRadius: 6, padding: '18px 20px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#27ae60', textTransform: 'uppercase', marginBottom: 12 }}>✓ Diferencias clave</div>
+              <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: 13, color: 'var(--muted-strong)', lineHeight: 1.75 }}>
+                <li><strong>Es obligatorio</strong> — no es una estafa voluntaria: el Estado exige la cotización. No hay víctimas engañadas.</li>
+                <li>El Estado puede <strong>subir impuestos, alargar la edad de jubilación o reducir prestaciones</strong> para ajustar el equilibrio — un Ponzi privado no puede.</li>
+                <li>Tiene un <strong>fin social explícito</strong> (evitar la pobreza en la vejez), no enriquecimiento del operador.</li>
+                <li>En economías con <strong>crecimiento real del PIB</strong>, el sistema de reparto es matemáticamente sostenible (teorema de Samuelson): si los salarios crecen más rápido que la tasa de descuento, genera valor neto positivo.</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Veredicto */}
+          <div style={{ background: 'color-mix(in srgb, var(--foreground) 5%, var(--background))', border: '1px solid var(--card-border)', borderRadius: 6, padding: '18px 20px', fontSize: 13.5, lineHeight: 1.7, color: 'var(--foreground)' }}>
+            <strong>El veredicto honesto:</strong> estructuralmente, sí comparte la mecánica central de un Ponzi — los primeros participantes
+            obtuvieron pensiones sin haber cotizado lo suficiente (las primeras generaciones de jubilados de los años 60-70 recibieron
+            pensiones completas habiendo cotizado muy poco). La diferencia es que el Estado puede cambiar las reglas por ley y tiene
+            capacidad coercitiva. Lo que no puede hacer es ignorar la aritmética: con 2,54 cotizantes por pensionista,
+            subiendo a 16,8% del PIB en 2050, <strong>el sistema necesita reforma estructural</strong> — no porque sea fraudulento,
+            sino porque las bases demográficas sobre las que se diseñó en los años 60 ya no existen.
+          </div>
+
+          <div style={{ marginTop: 16, fontSize: 11, color: 'var(--muted)', lineHeight: 1.7 }}>
+            <strong>Referencia:</strong> Samuelson, P.A. (1958). «An Exact Consumption-Loan Model of Interest with or without the Social Contrivance of Money».{' '}
+            <em>Journal of Political Economy</em>, 66(6), 467–482. · Feldstein, M. (1996). «The Missing Piece in Policy Analysis: Social Security Reform».{' '}
+            <em>American Economic Review</em>, 86(2). · AIReF (2023). <em>Evaluación del gasto público: Pensiones contributivas</em>.
+          </div>
+        </div>
+      </div>
+
       {/* Fuentes */}
       <div style={{ borderTop: '1px solid var(--rule)', paddingTop: 20, fontSize: 11, color: 'var(--muted)', lineHeight: 1.8 }}>
         <strong>Fuentes:</strong> Ministerio de Inclusión, Seguridad Social y Migraciones — Estadísticas de Pensiones en vigor ·
