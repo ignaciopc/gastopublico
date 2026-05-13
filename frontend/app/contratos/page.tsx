@@ -13,6 +13,7 @@ interface ContratoItem {
   proc: string;
   licit: number;
   adjud: string;
+  estado: string;
   importe: number;
   flag: string;
   enlace: string;
@@ -130,7 +131,8 @@ function toItem(c: Contract): ContratoItem {
     organismo: c.organoContratante,
     proc: c.tipo,
     licit: 1,
-    adjud: c.adjudicatario || 'En proceso…',
+    adjud: c.adjudicatario || (c.estado === 'adjudicado' ? 'Adjudicado' : c.estado === 'resuelto' ? 'Resuelto' : c.estado === 'anulado' ? 'Anulado' : 'En proceso…'),
+    estado: c.estado,
     importe: c.importe,
     flag: c.importe >= 5_000_000 ? 'grandes' : '',
     enlace: c.enlace,
@@ -170,7 +172,7 @@ export default function ContratosPage() {
     let result = [...list];
     if (filter === 'grandes') result = result.filter(x => x.importe >= 5_000_000);
     if (filter === 'directa') result = result.filter(x => x.flag === 'directa');
-    if (filter === 'completados') result = result.filter(x => x.adjud && x.adjud !== 'En proceso…');
+    if (filter === 'completados') result = result.filter(x => x.estado === 'adjudicado' || x.estado === 'resuelto' || x.estado === 'anulado');
     if (organismo !== 'all') result = result.filter(x => x.organismo === organismo);
     if (search.trim()) {
       const q = search.toLowerCase();
