@@ -1,4 +1,6 @@
-export const revalidate = 86400;
+'use client';
+
+import ShareButton from '@/components/ui/ShareButton';
 
 const GASTO_EDUCACION = [
   { year: 2015, valor: 43.8, pib: 4.3 },
@@ -108,24 +110,42 @@ export default function EducacionPage() {
   const maxAlumno = Math.max(...GASTO_ALUMNO.map(d => d.euros));
 
   return (
-    <main style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px 80px' }}>
+    <main>
 
-      {/* Header */}
-      <div style={{ marginBottom: 40 }}>
-        <div style={{ marginBottom: 12 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: 'var(--muted)', textTransform: 'uppercase' }}>
+      {/* ── HERO OSCURO ───────────────────────────────────────────────── */}
+      <section style={{ background: '#0a0a0d', color: '#ededeb', padding: '56px 0 48px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>
             Ministerio de Educación · OCDE PISA · Eurostat
-          </span>
+          </div>
+          <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 64px)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.05, margin: '0 0 18px', maxWidth: 900, color: '#ededeb' }}>
+            8 leyes educativas en 50 años.<br />
+            <span style={{ color: '#ef4d68' }}>Los resultados bajan en cada PISA.</span>
+          </h1>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', maxWidth: 720, lineHeight: 1.6, margin: '0 0 32px' }}>
+            España gasta el <strong style={{ color: '#ef4d68' }}>4,8% del PIB</strong> en educación, por debajo de la media europea.
+            El abandono escolar temprano es del <strong style={{ color: '#ef4d68' }}>{abandonoActual}%</strong> — casi el doble de la UE.
+            Y los resultados PISA <strong style={{ color: '#ef4d68' }}>bajan en cada edición</strong> desde 2015.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 1, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+            {[
+              { label: 'Gasto educación 2023', value: `${gastoActual.valor.toFixed(1)} MM€`, sub: `${gastoActual.pib}% del PIB` },
+              { label: 'Abandono escolar', value: `${abandonoActual}%`, sub: 'Media UE: 9,5%' },
+              { label: 'PISA Matemáticas', value: `${pisaUltimo.mates} pts`, sub: `−${pisaPrimero.mates - pisaUltimo.mates} desde 2015` },
+              { label: 'Universitarios 25–34', value: '47,7%', sub: 'por encima media UE' },
+              { label: 'Leyes educativas', value: '8', sub: 'desde 1970 — inestabilidad' },
+            ].map((k, i, arr) => (
+              <div key={k.label} style={{ padding: '18px 20px', background: 'rgba(255,255,255,0.02)', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 0 }}>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 6 }}>{k.label}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-mono), monospace', color: '#ef4d68', lineHeight: 1 }}>{k.value}</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 5 }}>{k.sub}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <h1 style={{ fontSize: 'clamp(26px,5vw,42px)', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 14, lineHeight: 1.1 }}>
-          Educación en España
-        </h1>
-        <p style={{ fontSize: 16, color: 'var(--muted-strong)', maxWidth: 620, lineHeight: 1.6 }}>
-          España gasta el <strong style={{ color: 'var(--foreground)' }}>4,8% del PIB</strong> en educación, por debajo de la media europea.
-          La tasa de abandono escolar es del <strong style={{ color: 'var(--foreground)' }}>{abandonoActual}%</strong> — casi el doble que la UE.
-          Los resultados PISA llevan <strong style={{ color: 'var(--foreground)' }}>caído en cada edición</strong> desde 2015.
-        </p>
-      </div>
+      </section>
+
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '40px 24px 0' }}>
 
       {/* KPI Strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: 12, marginBottom: 48 }}>
@@ -147,7 +167,10 @@ export default function EducacionPage() {
 
       {/* Abandono escolar evolución */}
       <div style={{ marginBottom: 48 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Abandono escolar temprano 2015–2023</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700 }}>Abandono escolar temprano 2015–2023</h2>
+          <ShareButton text={`El ${abandonoActual}% de los jóvenes españoles abandona los estudios antes de acabar el bachillerato. La media de la UE es 9,5%. España casi la dobla.`} size="sm" />
+        </div>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>
           % de jóvenes de 18–24 años que solo tienen educación obligatoria y no siguen estudiando (Eurostat / INE)
         </p>
@@ -161,7 +184,6 @@ export default function EducacionPage() {
                   <span style={{ width: 36, fontSize: 11, color: 'var(--muted)', textAlign: 'right', flexShrink: 0 }}>{d.year}</span>
                   <div style={{ flex: 1, background: 'var(--card-border)', borderRadius: 2, height: 22, overflow: 'hidden', position: 'relative' }}>
                     <div style={{ width: `${pct}%`, background: color, height: '100%', borderRadius: 2 }} />
-                    {/* EU target 9.5% line */}
                     <div style={{ position: 'absolute', left: `${Math.round((9.5 / 25) * 100)}%`, top: 0, bottom: 0, width: 1, background: 'rgba(39,174,96,0.7)' }} />
                   </div>
                   <span style={{ width: 48, fontSize: 12, fontWeight: 700, color, textAlign: 'right', flexShrink: 0 }}>{d.valor}%</span>
@@ -178,7 +200,10 @@ export default function EducacionPage() {
 
       {/* PISA */}
       <div style={{ marginBottom: 48 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Resultados PISA — España 2015–2022</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700 }}>Resultados PISA — España 2015–2022</h2>
+          <ShareButton text={`Los resultados PISA de España bajan en cada edición desde 2015. Matemáticas: ${pisaPrimero.mates}→${pisaUltimo.mates} pts. 8 leyes educativas y los resultados empeoran.`} size="sm" />
+        </div>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>
           Puntuación media en la evaluación triennial de la OCDE a alumnos de 15 años · Media OCDE: ~470 pts
         </p>
@@ -308,6 +333,32 @@ export default function EducacionPage() {
         Eurostat — Education and training statistics ·
         INE — Encuesta de Población Activa (módulo de educación)
       </div>
+      </div>{/* cierre del wrapper max-width */}
+
+      {/* ── QUÉ SE DEBERÍA HACER ─────────────────────────────────────── */}
+      <section style={{ background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '52px 0 64px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué se debería hacer?</div>
+          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 32px' }}>
+            Cinco reformas para un sistema educativo de calidad.
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            {[
+              { titulo: 'Pacto de Estado educativo a 20 años', detalle: 'España ha tenido 8 leyes educativas en 50 años. Cada gobierno reforma el sistema según su ideología y el siguiente lo deshace. Un pacto nacional que excluya la educación de la batalla política (como en Finlandia) es condición necesaria para cualquier mejora.', impacto: 'Estabilidad que permita evaluar y mejorar durante dos generaciones', color: '#ef4d68' },
+              { titulo: 'FP dual al estilo alemán', detalle: 'Solo el 22% estudia FP en España, frente al 60%+ de Alemania. El modelo dual (empresa + centro formativo) conecta la formación con las necesidades del mercado y reduce el paro juvenil. Hay que eliminar el estigma social de la FP y crear más plazas en ciclos con demanda.', impacto: 'Reducir el paro juvenil del 26% al 12–15% en 10 años', color: '#e67e22' },
+              { titulo: 'Carrera docente competitiva', detalle: 'Finlandia selecciona sus maestros entre el 10% mejor de los graduados universitarios. En España, el acceso a la función docente tiene poca selección de calidad. Una oposición que evalúe la aptitud pedagógica y un sistema de incentivos por resultados elevaría el nivel.', impacto: 'PISA +15–20 puntos en un plazo de 10 años (evidencia de Finlandia, Corea)', color: '#2563eb' },
+              { titulo: 'Evaluación externa y publicación de resultados', detalle: 'España no tiene una evaluación externa estandarizada por centro escolar. Sin saber qué colegios tienen buenos resultados y por qué, no se puede mejorar. La transparencia (publicar resultados ajustados por contexto socioeconómico) permite identificar buenas prácticas y replicarlas.', impacto: 'Identificar y escalar las mejores prácticas pedagógicas', color: '#059669' },
+              { titulo: 'Refuerzo en primaria, no en bachillerato', detalle: 'España invierte más por alumno en universidad (9.100€) que en primaria (6.420€). La evidencia científica indica que el retorno económico de la inversión educativa es mayor en las edades tempranas. Subir el ratio de maestros en infantil y primaria reduce el abandono escolar posterior.', impacto: 'Reducir el abandono del 13,7% al objetivo UE del 9% para 2030', color: '#8e44ad' },
+            ].map(m => (
+              <div key={m.titulo} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.color}30`, borderRadius: 6, padding: '20px 18px', borderTop: `3px solid ${m.color}` }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#ededeb', marginBottom: 8, lineHeight: 1.35 }}>{m.titulo}</div>
+                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12 }}>{m.detalle}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: m.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'var(--font-mono), monospace' }}>→ {m.impacto}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

@@ -1,4 +1,7 @@
-export const revalidate = 86400;
+'use client';
+
+import { useState } from 'react';
+import ShareButton from '@/components/ui/ShareButton';
 
 const PARO_GENERAL = [
   { year: 2015, valor: 22.1 },
@@ -82,6 +85,101 @@ function BarChart({ data, maxVal, color = 'var(--accent)', fmt }: {
   );
 }
 
+function Calculadora() {
+  const [salario, setSalario] = useState(1800);
+  const [meses, setMeses] = useState(18);
+
+  const duracion = Math.min(Math.floor(meses / 3), 24);
+  const base = salario * 0.7; // base reguladora aproximada (70% salario bruto ≈ base cotización)
+
+  // Prestación: 70% base 1os 6 meses, 50% resto
+  const meses1 = Math.min(duracion, 6);
+  const meses2 = Math.max(0, duracion - 6);
+  const prestacion1 = base * 0.70;
+  const prestacion2 = base * 0.50;
+
+  const MIN = 560;
+  const MAX_SIN_HIJOS = 1575;
+
+  const prest1 = Math.min(Math.max(prestacion1, MIN), MAX_SIN_HIJOS);
+  const prest2 = Math.min(Math.max(prestacion2, MIN), MAX_SIN_HIJOS);
+
+  const totalBruto = meses1 * prest1 + meses2 * prest2;
+  const tasaSust1 = Math.round((prest1 / salario) * 100);
+
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--card-border)', borderRadius: 8, padding: '28px 24px', marginBottom: 48 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Calcula tu prestación por desempleo</h2>
+          <p style={{ fontSize: 13, color: 'var(--muted)' }}>Basado en el RDL 3/2015 — SEPE · Estimación orientativa</p>
+        </div>
+        <ShareButton text={`Si me quedara en paro hoy, cobraría ${prest1.toFixed(0)}€/mes durante ${duracion} meses. Con un salario de ${salario}€. Así funciona la prestación por desempleo en España.`} size="sm" />
+      </div>
+
+      <div className="calc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28 }}>
+        <div>
+          <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>
+            Salario bruto mensual: <span style={{ color: 'var(--foreground)' }}>{salario.toLocaleString('es-ES')} €</span>
+          </label>
+          <input
+            type="range" min={800} max={5000} step={50} value={salario}
+            onChange={e => setSalario(Number(e.target.value))}
+            style={{ width: '100%', accentColor: 'var(--accent)' }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>
+            <span>800 €</span><span>5.000 €</span>
+          </div>
+        </div>
+        <div>
+          <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>
+            Meses cotizados (últimos 6 años): <span style={{ color: 'var(--foreground)' }}>{meses} meses</span>
+          </label>
+          <input
+            type="range" min={12} max={72} step={1} value={meses}
+            onChange={e => setMeses(Number(e.target.value))}
+            style={{ width: '100%', accentColor: 'var(--accent)' }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>
+            <span>12 meses</span><span>72 meses</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 20 }}>
+        <div style={{ background: 'var(--background)', border: '1px solid var(--card-border)', borderRadius: 6, padding: '14px 16px' }}>
+          <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Prestación 1os 6 meses</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--accent)', fontFamily: 'var(--font-mono), monospace' }}>{prest1.toFixed(0)} €</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>70% base reguladora</div>
+        </div>
+        <div style={{ background: 'var(--background)', border: '1px solid var(--card-border)', borderRadius: 6, padding: '14px 16px' }}>
+          <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>A partir del mes 7</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: meses2 > 0 ? 'var(--accent)' : 'var(--muted)', fontFamily: 'var(--font-mono), monospace' }}>
+            {meses2 > 0 ? `${prest2.toFixed(0)} €` : '—'}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>50% base reguladora</div>
+        </div>
+        <div style={{ background: 'var(--background)', border: '1px solid var(--card-border)', borderRadius: 6, padding: '14px 16px' }}>
+          <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Duración total</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--foreground)', fontFamily: 'var(--font-mono), monospace' }}>{duracion} meses</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>{meses} meses cotizados ÷ 3</div>
+        </div>
+        <div style={{ background: 'var(--background)', border: '1px solid var(--card-border)', borderRadius: 6, padding: '14px 16px' }}>
+          <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Tasa de sustitución</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: tasaSust1 >= 50 ? '#059669' : 'var(--accent)', fontFamily: 'var(--font-mono), monospace' }}>{tasaSust1}%</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>del salario bruto</div>
+        </div>
+      </div>
+
+      <div style={{ padding: '12px 16px', background: 'color-mix(in srgb, var(--accent) 8%, transparent)', borderRadius: 6, fontSize: 12, color: 'var(--muted-strong)', lineHeight: 1.6 }}>
+        <strong>Total estimado:</strong> {totalBruto.toLocaleString('es-ES', { maximumFractionDigits: 0 })} € brutos durante {duracion} meses.
+        Mínimo legal: {MIN} €/mes. Máximo sin hijos: {MAX_SIN_HIJOS.toLocaleString('es-ES')} €/mes.
+        Con hijos: hasta 1.838 €/mes. El SEPE descuenta IRPF y cotización a la Seguridad Social.
+      </div>
+    </div>
+  );
+}
+
 export default function ParoPage() {
   const paroActual = PARO_GENERAL[PARO_GENERAL.length - 1].valor;
   const paroPico = Math.max(...PARO_GENERAL.map(d => d.valor));
@@ -147,9 +245,15 @@ export default function ParoPage() {
         ))}
       </div>
 
+      {/* Calculadora prestación */}
+      <Calculadora />
+
       {/* Evolución paro general */}
       <div style={{ marginBottom: 48 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Evolución del paro 2015–2024</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700 }}>Evolución del paro 2015–2024</h2>
+          <ShareButton text={`España lleva una década con el doble de paro que la media europea. En 2024: ${paroActual}% vs 5,9% de la UE.`} size="sm" />
+        </div>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>
           Tasa de desempleo anual (media anual EPA, INE) · % sobre población activa
         </p>
@@ -163,7 +267,6 @@ export default function ParoPage() {
                   <span style={{ width: 36, fontSize: 11, color: 'var(--muted)', textAlign: 'right', flexShrink: 0 }}>{d.year}</span>
                   <div style={{ flex: 1, background: 'var(--card-border)', borderRadius: 2, height: 22, overflow: 'hidden', position: 'relative' }}>
                     <div style={{ width: `${pct}%`, background: color, height: '100%', borderRadius: 2 }} />
-                    {/* EU average line at ~6% */}
                     <div style={{ position: 'absolute', left: `${Math.round((5.9 / 25) * 100)}%`, top: 0, bottom: 0, width: 1, background: 'rgba(255,255,255,0.5)' }} />
                   </div>
                   <span style={{ width: 42, fontSize: 12, fontWeight: 700, color, textAlign: 'right', flexShrink: 0 }}>{d.valor}%</span>
@@ -179,7 +282,10 @@ export default function ParoPage() {
 
       {/* Paro juvenil */}
       <div style={{ marginBottom: 48 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Paro juvenil ({'<'}25 años) 2015–2024</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700 }}>Paro juvenil ({'<'}25 años) 2015–2024</h2>
+          <ShareButton text={`El paro juvenil en España es del ${paroJuvenilActual}%. La media de la UE es 14,9%. Casi el doble.`} size="sm" />
+        </div>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>
           % sobre población activa menor de 25 años · España vs Media UE (14,9%)
         </p>
@@ -193,7 +299,6 @@ export default function ParoPage() {
                   <div style={{ fontSize: 10, color: 'var(--muted)', marginBottom: 4 }}>{d.year}</div>
                   <div style={{ height: 90, background: 'var(--card-border)', borderRadius: 4, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', position: 'relative' }}>
                     <div style={{ height: `${pct}%`, background: color, borderRadius: '0 0 4px 4px' }} />
-                    {/* EU line at 14.9% */}
                     <div style={{ position: 'absolute', bottom: `${Math.round((14.9 / 50) * 100)}%`, left: 0, right: 0, height: 1, background: 'rgba(39,174,96,0.8)' }} />
                   </div>
                   <div style={{ fontSize: 11, fontWeight: 700, color, marginTop: 4 }}>{d.valor}%</div>
@@ -210,7 +315,10 @@ export default function ParoPage() {
 
       {/* Paro por CCAA */}
       <div style={{ marginBottom: 48 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Paro por Comunidad Autónoma — 2024</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700 }}>Paro por Comunidad Autónoma — 2024</h2>
+          <ShareButton text={`Nacer en Navarra (7,2% paro) o en Ceuta (22,1%) supone 15 puntos de diferencia en tu probabilidad de encontrar trabajo. La brecha territorial es estructural.`} size="sm" />
+        </div>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>
           % tasa de paro · EPA Q1 2024 · Diferencia de 15 puntos entre la mejor y la peor CCAA
         </p>
