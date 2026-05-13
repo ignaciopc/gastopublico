@@ -1,9 +1,6 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/ui/PageHeader';
 import { PageLoader } from '@/components/ui/Spinner';
 import type { Contract } from '@/lib/types';
@@ -141,7 +138,6 @@ function toItem(c: Contract): ContratoItem {
 }
 
 export default function ContratosPage() {
-  const searchParams = useSearchParams();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +148,7 @@ export default function ContratosPage() {
   const [organismo, setOrganismo] = useState('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [search, setSearch] = useState(searchParams.get('q') ?? '');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetch('/api/contratos')
