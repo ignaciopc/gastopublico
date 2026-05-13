@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/ui/PageHeader';
 import { PageLoader } from '@/components/ui/Spinner';
@@ -91,6 +91,8 @@ export default function SubvencionesPage() {
 
   const [searchQ, setSearchQ] = useState(searchParams.get('q') ?? '');
   const [searchTipo, setSearchTipo] = useState('');
+  const [searchImporte, setSearchImporte] = useState(0);
+  const [searchSort, setSearchSort] = useState<'importe' | 'fecha'>('importe');
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -146,6 +148,13 @@ export default function SubvencionesPage() {
 
   const pctTop100 = data?.stats.find(s => s.label.includes('Top'))?.value ?? '17,3%';
 
+  const displayRows = useMemo(() => {
+    let rows: (SearchResult | TopPerceptor)[] = searchResults ?? data?.top ?? [];
+    if (searchImporte > 0) rows = rows.filter(r => r.importe >= searchImporte);
+    if (searchSort === 'importe') rows = [...rows].sort((a, b) => b.importe - a.importe);
+    return rows;
+  }, [searchResults, data?.top, searchImporte, searchSort]);
+
   return (
     <>
       <PageHeader
@@ -159,58 +168,85 @@ export default function SubvencionesPage() {
         ]}
       />
 
-      {/* Search bar */}
-      <section style={{ padding: '24px 0', borderBottom: '1px solid var(--rule)', background: 'var(--card)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div className="eyebrow-muted" style={{ marginBottom: 10 }}>Buscar en 343 concesiones →</div>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="Buscar beneficiario o descripción..."
-              value={searchQ}
-              onChange={e => {
-                setSearchQ(e.target.value);
-                handleSearchChange(e.target.value, searchTipo);
-              }}
-              style={{
-                flex: '1 1 300px', padding: '10px 14px',
-                border: '1px solid var(--card-border)', borderRadius: 3,
-                background: 'var(--background)', color: 'var(--foreground)',
-                fontSize: 14, fontFamily: 'inherit',
-              }}
-            />
-            <select
-              value={searchTipo}
-              onChange={e => {
-                setSearchTipo(e.target.value);
-                handleSearchChange(searchQ, e.target.value);
-              }}
-              style={{
-                flex: '0 1 240px', padding: '10px 12px',
-                border: '1px solid var(--card-border)', borderRadius: 3,
-                background: 'var(--background)', color: 'var(--foreground)',
-                fontSize: 14, fontFamily: 'inherit',
-              }}
-            >
-              <option value="">Todos los tipos</option>
-              {TIPOS_BENEFICIARIO.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            {(searchQ || searchTipo) && (
-              <button
-                onClick={() => {
-                  setSearchQ('');
-                  setSearchTipo('');
-                  setSearchResults(null);
-                }}
+      {/* Search + filtros */}
+      <section style={{ padding: '28px 0 20px', borderBottom: '1px solid var(--rule)', background: 'var(--card)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Input principal */}
+          <div>
+            <div className="eyebrow-muted" style={{ marginBottom: 8 }}>🔍 Buscador de subvenciones</div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <input
+                type="text"
+                placeholder="Busca por beneficiario, organismo o descripción…"
+                value={searchQ}
+                onChange={e => { setSearchQ(e.target.value); handleSearchChange(e.target.value, searchTipo); }}
                 style={{
-                  padding: '10px 16px', border: '1px solid var(--card-border)', borderRadius: 3,
-                  background: 'transparent', color: 'var(--muted)', fontSize: 13, cursor: 'pointer',
-                  fontFamily: 'inherit',
+                  flex: 1, padding: '11px 14px',
+                  border: '1px solid var(--accent)', borderRadius: 4,
+                  background: 'var(--background)', color: 'var(--foreground)',
+                  fontSize: 14, fontFamily: 'inherit', outline: 'none',
                 }}
-              >
-                Limpiar
-              </button>
-            )}
+              />
+              {(searchQ || searchTipo || searchImporte > 0) && (
+                <button onClick={() => { setSearchQ(''); setSearchTipo(''); setSearchImporte(0); setSearchResults(null); }}
+                  style={{ padding: '0 16px', border: '1px solid var(--card-border)', borderRadius: 4, background: 'transparent', color: 'var(--muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                  Limpiar todo
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Filtros en fila */}
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+
+            {/* Tipo de beneficiario */}
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 8 }}>Tipo de beneficiario</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {[{ k: '', l: 'Todos' }, ...TIPOS_BENEFICIARIO.map(t => ({ k: t, l: t }))].map(f => (
+                  <button key={f.k} onClick={() => { setSearchTipo(f.k); handleSearchChange(searchQ, f.k); }}
+                    style={{
+                      padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 3, cursor: 'pointer', fontFamily: 'inherit',
+                      border: '1px solid ' + (searchTipo === f.k ? 'var(--accent)' : 'var(--card-border)'),
+                      background: searchTipo === f.k ? 'var(--accent)' : 'transparent',
+                      color: searchTipo === f.k ? '#fff' : 'var(--foreground)',
+                    }}>{f.l}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Importe mínimo */}
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 8 }}>Importe mínimo</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[{ k: 0, l: 'Todos' }, { k: 100_000, l: '≥ 100k€' }, { k: 1_000_000, l: '≥ 1M€' }, { k: 10_000_000, l: '≥ 10M€' }].map(f => (
+                  <button key={f.k} onClick={() => setSearchImporte(f.k)}
+                    style={{
+                      padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 3, cursor: 'pointer', fontFamily: 'var(--font-mono), monospace',
+                      border: '1px solid ' + (searchImporte === f.k ? 'var(--accent)' : 'var(--card-border)'),
+                      background: searchImporte === f.k ? 'var(--accent)' : 'transparent',
+                      color: searchImporte === f.k ? '#fff' : 'var(--foreground)',
+                    }}>{f.l}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Ordenar */}
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 8 }}>Ordenar por</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[{ k: 'importe' as const, l: 'Mayor importe' }, { k: 'fecha' as const, l: 'Más recientes' }].map(f => (
+                  <button key={f.k} onClick={() => setSearchSort(f.k)}
+                    style={{
+                      padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 3, cursor: 'pointer', fontFamily: 'inherit',
+                      border: '1px solid ' + (searchSort === f.k ? 'var(--foreground)' : 'var(--card-border)'),
+                      background: searchSort === f.k ? 'var(--foreground)' : 'transparent',
+                      color: searchSort === f.k ? 'var(--background)' : 'var(--foreground)',
+                    }}>{f.l}</button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -272,10 +308,10 @@ export default function SubvencionesPage() {
                   {searchResults !== null ? (
                     <>
                       <div className="eyebrow" style={{ marginBottom: 10 }}>
-                        Resultados de búsqueda ({searchResults.length})
+                        Resultados de búsqueda ({displayRows.length})
                       </div>
                       <h2 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 18px', letterSpacing: '-0.02em' }}>
-                        {searchResults.length === 0 ? 'Sin resultados' : `${searchResults.length} concesiones encontradas`}
+                        {displayRows.length === 0 ? 'Sin resultados' : `${displayRows.length} concesiones encontradas`}
                       </h2>
                     </>
                   ) : (
@@ -292,8 +328,8 @@ export default function SubvencionesPage() {
                     </div>
                   ) : (
                     <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)' }}>
-                      {(searchResults ?? data.top).map((row, i) => {
-                        const rows = searchResults ?? data.top;
+                      {displayRows.map((row, i) => {
+                        const rows = displayRows;
                         return (
                           <div
                             key={row.rank}
@@ -329,7 +365,7 @@ export default function SubvencionesPage() {
                           </div>
                         );
                       })}
-                      {(searchResults ?? data.top).length === 0 && (
+                      {displayRows.length === 0 && (
                         <div style={{ padding: '32px 18px', textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
                           No se encontraron resultados para tu búsqueda.
                         </div>
