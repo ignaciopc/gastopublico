@@ -1,0 +1,20 @@
+# Frontend has its own git repo
+frontend/
+
+# Dependencies
+node_modules/
+backend/bot-x/node_modules/
+backend/bot-x/dist/
+
+# Environment variables (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
