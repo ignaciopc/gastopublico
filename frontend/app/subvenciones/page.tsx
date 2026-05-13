@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/ui/PageHeader';
 import { PageLoader } from '@/components/ui/Spinner';
 
@@ -83,11 +84,12 @@ function PieRow({ t, idx, last }: { t: TipoRow; idx: number; last: boolean }) {
 }
 
 export default function SubvencionesPage() {
+  const searchParams = useSearchParams();
   const [data, setData] = useState<SubvencionesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [searchQ, setSearchQ] = useState('');
+  const [searchQ, setSearchQ] = useState(searchParams.get('q') ?? '');
   const [searchTipo, setSearchTipo] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -108,6 +110,12 @@ export default function SubvencionesPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  // Pre-fill search from URL ?q= param
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) runSearch(q, '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const runSearch = useCallback(async (q: string, tipo: string) => {
     if (!q && !tipo) {

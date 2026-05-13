@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import NavSearch from '@/components/ui/NavSearch';
 
 type NavItem = { href: string; label: string };
 type NavGroup = { label: string; items: NavItem[] };
@@ -176,6 +177,9 @@ export default function Navbar() {
         </nav>
 
         <div style={{ flex: 1 }} />
+
+        {/* Global search */}
+        <NavSearch />
 
         {/* EN DIRECTO badge */}
         <span className="tag tag-live mono hidden sm:inline-flex" style={{ fontSize: 10 }}>EN DIRECTO</span>

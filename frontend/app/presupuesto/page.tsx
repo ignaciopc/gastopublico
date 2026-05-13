@@ -56,6 +56,7 @@ export default function PresupuestoPage() {
   const [error, setError] = useState<string | null>(null);
   const [errorHist, setErrorHist] = useState<string | null>(null);
   const [minOrder, setMinOrder] = useState<MinOrder>('monto');
+  const [minSearch, setMinSearch] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -86,12 +87,17 @@ export default function PresupuestoPage() {
 
   const ministeriosSorted = useMemo(() => {
     if (!stats) return [];
-    return [...stats.bySeccion].sort((a, b) => {
+    let list = [...stats.bySeccion];
+    if (minSearch.trim()) {
+      const q = minSearch.toLowerCase();
+      list = list.filter(m => m.descripcion.toLowerCase().includes(q));
+    }
+    return list.sort((a, b) => {
       if (minOrder === 'ejec') return b.tasaEjecucion - a.tasaEjecucion;
       if (minOrder === 'delta') return b.tasaEjecucion - a.tasaEjecucion;
       return b.obligacionesReconocidas - a.obligacionesReconocidas;
-    }).slice(0, 12);
-  }, [stats, minOrder]);
+    }).slice(0, minSearch.trim() ? 100 : 12);
+  }, [stats, minOrder, minSearch]);
 
   const TABS: { k: Tab; l: string }[] = [
     { k: 'actual', l: 'Año actual' },
@@ -173,14 +179,26 @@ export default function PresupuestoPage() {
                           Gasto ejecutado por ministerio
                         </h2>
                       </div>
-                      <select value={minOrder} onChange={e => setMinOrder(e.target.value as MinOrder)} style={{
-                        padding: '8px 10px', border: '1px solid var(--card-border)',
-                        background: 'var(--background)', color: 'var(--foreground)',
-                        borderRadius: 3, fontSize: 12, fontFamily: 'inherit',
-                      }}>
-                        <option value="monto">Ordenar: importe</option>
-                        <option value="ejec">Ordenar: % ejecutado</option>
-                      </select>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input
+                          value={minSearch}
+                          onChange={e => setMinSearch(e.target.value)}
+                          placeholder="Filtrar ministerio…"
+                          style={{
+                            padding: '7px 10px', border: '1px solid var(--card-border)',
+                            background: 'var(--background)', color: 'var(--foreground)',
+                            borderRadius: 3, fontSize: 12, fontFamily: 'inherit', width: 180,
+                          }}
+                        />
+                        <select value={minOrder} onChange={e => setMinOrder(e.target.value as MinOrder)} style={{
+                          padding: '8px 10px', border: '1px solid var(--card-border)',
+                          background: 'var(--background)', color: 'var(--foreground)',
+                          borderRadius: 3, fontSize: 12, fontFamily: 'inherit',
+                        }}>
+                          <option value="monto">Ordenar: importe</option>
+                          <option value="ejec">Ordenar: % ejecutado</option>
+                        </select>
+                      </div>
                     </div>
                     <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)' }}>
                       {ministeriosSorted.map((m, i) => {
