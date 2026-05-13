@@ -1,15 +1,22 @@
-# Frontend has its own git repo
-frontend/
-
 # Dependencies
 node_modules/
+frontend/node_modules/
 backend/bot-x/node_modules/
 backend/bot-x/dist/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
 
 # Environment variables (never commit secrets)
 .env
 .env.local
 .env.*.local
+frontend/.env.local
+frontend/.env*.local
+
+# TypeScript build info
+frontend/tsconfig.tsbuildinfo
 
 # Logs
 *.log
