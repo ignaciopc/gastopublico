@@ -1,9 +1,19 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/ui/PageHeader';
 import { PageLoader } from '@/components/ui/Spinner';
 import type { Contract } from '@/lib/types';
+
+function SearchInit({ onQ }: { onQ: (q: string) => void }) {
+  const params = useSearchParams();
+  useEffect(() => {
+    const q = params.get('q') ?? '';
+    if (q) onQ(q);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
 
 interface ContratoItem {
   fecha: string;
@@ -220,6 +230,9 @@ export default function ContratosPage() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <SearchInit onQ={setSearch} />
+      </Suspense>
       <PageHeader
         eyebrow="Contratación pública · En directo"
         title={`${fmtImp(totalFiltrado)} en el feed actual. ¿Sabes a quién?`}

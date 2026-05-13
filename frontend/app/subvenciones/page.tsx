@@ -1,8 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/ui/PageHeader';
 import { PageLoader } from '@/components/ui/Spinner';
+
+function SearchInit({ onQ }: { onQ: (q: string) => void }) {
+  const params = useSearchParams();
+  useEffect(() => {
+    const q = params.get('q') ?? '';
+    if (q) onQ(q);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
 
 interface StatKpi {
   label: string;
@@ -149,6 +159,9 @@ export default function SubvencionesPage() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <SearchInit onQ={q => { setSearchQ(q); handleSearchChange(q, searchTipo); }} />
+      </Suspense>
       <PageHeader
         eyebrow="Subvenciones · Base de Datos Nacional"
         title={`47.840 millones repartidos. El ${pctTop100} va a 100 perceptores.`}
