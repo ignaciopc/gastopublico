@@ -197,4 +197,5 @@ canvas { max-width: 100%; }
 
 @media (max-width: 640px) {
   .ponzi-grid { grid-template-columns: 1fr !important; }
+  .calc-grid  { grid-template-columns: 1fr !important; }
 }
