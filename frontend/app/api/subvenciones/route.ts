@@ -48,7 +48,7 @@ export async function GET(request: Request) {
   const all = searchParams.get('all') === '1';
 
   // Search mode: query Supabase directly, return up to 100 results
-  if (q || all) {
+  if (q || tipo || all) {
     try {
       let query = supabase
         .from('subvenciones')
