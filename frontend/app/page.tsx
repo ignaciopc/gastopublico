@@ -656,10 +656,10 @@ export default async function HomePage() {
           <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
             <div className="eyebrow" style={{ marginBottom: 6 }}>PGE {CURRENT_EJERCICIO} · Datos IGAE</div>
             <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-              Top 5 partidas por gasto ejecutado
+              ¿Dónde va tu dinero? Los 5 mayores gastos del Estado en {CURRENT_EJERCICIO}
             </h2>
             <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 24px' }}>
-              Obligaciones reconocidas netas · Euros corrientes
+              Cada euro que aparece aquí salió de los impuestos de los ciudadanos. El porcentaje indica cuánto del presupuesto asignado se ha gastado realmente.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {top5.map((s, i) => {
