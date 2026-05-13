@@ -172,6 +172,7 @@ export default function ContratosPage() {
     let result = [...list];
     if (filter === 'grandes') result = result.filter(x => x.importe >= 5_000_000);
     if (filter === 'directa') result = result.filter(x => x.flag === 'directa');
+    if (filter === 'completados') result = result.filter(x => x.adjud && x.adjud !== 'En proceso…');
     if (organismo !== 'all') result = result.filter(x => x.organismo === organismo);
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -311,6 +312,7 @@ export default function ContratosPage() {
               {[
                 { k: 'all', l: 'Todos' },
                 { k: 'grandes', l: '≥ 5 M€' },
+                { k: 'completados', l: '✅ Completados' },
               ].map(f => (
                 <button key={f.k} onClick={() => setFilter(f.k)} style={{
                   padding: '8px 14px',
