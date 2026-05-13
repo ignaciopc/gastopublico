@@ -4,6 +4,7 @@ export const IGAE_BASE_URL =
 // IGAE publishes monthly budget execution CSVs. These are the direct download URLs.
 // Format: Estado - Ejecución mensual acumulada
 export const IGAE_CSV_URLS: Record<number, string> = {
+  2025: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/ejecucion/Documents/EjecucionPresupuestariaEstado2025.csv',
   2024: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/ejecucion/Documents/EjecucionPresupuestariaEstado2024.csv',
   2023: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/ejecucion/Documents/EjecucionPresupuestariaEstado2023.csv',
   2022: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/ejecucion/Documents/EjecucionPresupuestariaEstado2022.csv',
@@ -22,7 +23,7 @@ export const CACHE_TTL = {
   DATASETS: 6 * 60 * 60 * 1000,     // 6 hours
 } as const;
 
-export const CURRENT_EJERCICIO = 2024;
+export const CURRENT_EJERCICIO = 2025;
 
 export const MINISTERIOS_MAP: Record<string, string> = {
   '01': 'Casa de S.M. el Rey',
