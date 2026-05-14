@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { formatEUR } from '@/lib/formatters';
 import GabineteGrid, { POLITICOS } from '@/components/ui/GabineteGrid';
+import TodosLosCargos from '@/components/ui/TodosLosCargos';
 
 export const revalidate = 86400;
 
@@ -161,6 +162,8 @@ export default async function PoliticosPage() {
       </section>
 
       <GabineteGrid fotos={fotos} />
+
+      <TodosLosCargos />
 
       {/* ── TABLA RETRIBUCIONES ──────────────────────────────────────────── */}
       <section style={{ padding: '52px 0', borderBottom: '1px solid var(--rule)' }}>
