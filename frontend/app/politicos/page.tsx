@@ -1,8 +1,67 @@
 import Link from 'next/link';
 import { formatEUR } from '@/lib/formatters';
-import GabineteGrid from '@/components/ui/GabineteGrid';
+import GabineteGrid, { POLITICOS } from '@/components/ui/GabineteGrid';
 
 export const revalidate = 86400;
+
+// Mapa: nombre en el componente → título en Wikipedia español
+const WIKI_TITLES: Record<string, string> = {
+  'Pedro Sánchez':          'Pedro_Sánchez',
+  'María J. Montero':       'María_Jesús_Montero_Mingorance',
+  'Félix Bolaños':          'Félix_Bolaños_García',
+  'José M. Albares':        'José_Manuel_Albares',
+  'Margarita Robles':       'Margarita_Robles_Fernández',
+  'Fernando G.-Marlaska':   'Fernando_Grande-Marlaska',
+  'Óscar Puente':           'Óscar_Puente_Santiago',
+  'Pilar Alegría':          'Pilar_Alegría_Continente',
+  'Diana Morant':           'Diana_Morant_Ripoll',
+  'Luis Planas':            'Luis_Planas_Puchades',
+  'Elma Saiz':              'Elma_Saiz_Delgado',
+  'Isabel Rodríguez':       'Isabel_Rodríguez_García',
+  'Ana Redondo':            'Ana_Redondo_García',
+  'Yolanda Díaz':           'Yolanda_Díaz',
+  'Mónica García':          'Mónica_García_Gómez',
+  'Pablo Bustinduy':        'Pablo_Bustinduy',
+  'José Luis Escrivá':      'José_Luis_Escrivá',
+  'Jordi Hereu':            'Jordi_Hereu',
+  'Carlos Cuerpo':          'Carlos_Cuerpo',
+  'Alberto N. Feijóo':      'Alberto_Núñez_Feijóo',
+  'Cuca Gamarra':           'Cuca_Gamarra',
+  'Isabel Díaz Ayuso':      'Isabel_Díaz_Ayuso',
+  'Juanma Moreno':          'Juanma_Moreno',
+  'Alfonso Rueda':          'Alfonso_Rueda',
+  'Santiago Abascal':       'Santiago_Abascal',
+};
+
+async function fetchWikiPhoto(wikiTitle: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(
+      `https://es.wikipedia.org/api/rest_v1/page/summary/${wikiTitle}`,
+      { next: { revalidate: 86400 }, headers: { 'User-Agent': 'GastoPublico.es/1.0' } }
+    );
+    if (!res.ok) return undefined;
+    const data = await res.json() as { thumbnail?: { source: string } };
+    return data.thumbnail?.source;
+  } catch {
+    return undefined;
+  }
+}
+
+async function fetchAllPhotos(): Promise<Record<string, string>> {
+  const results = await Promise.allSettled(
+    Object.entries(WIKI_TITLES).map(async ([nombre, title]) => {
+      const url = await fetchWikiPhoto(title);
+      return { nombre, url };
+    })
+  );
+  const fotos: Record<string, string> = {};
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value.url) {
+      fotos[r.value.nombre] = r.value.url;
+    }
+  }
+  return fotos;
+}
 
 // Fuente: Real Decreto 451/2012 + actualizaciones. BOE 2024
 const RETRIBUCIONES = [
@@ -58,7 +117,8 @@ const TOTAL_ASESORES_COSTE = ASESORES_MINISTERIO.reduce((s, a) => s + a.coste_an
 const TOTAL_ASESORES_N = ASESORES_MINISTERIO.reduce((s, a) => s + a.asesores, 0);
 const MAX_ASESORES = Math.max(...EVOLUCION_ASESORES.map(e => e.n));
 
-export default function PoliticosPage() {
+export default async function PoliticosPage() {
+  const fotos = await fetchAllPhotos();
   const maxCochesCoste = COCHES_OFICIALES[0].coste_anual;
   const maxAsesoresMin = ASESORES_MINISTERIO[0].asesores;
 
@@ -100,7 +160,7 @@ export default function PoliticosPage() {
         </div>
       </section>
 
-      <GabineteGrid />
+      <GabineteGrid fotos={fotos} />
 
       {/* ── TABLA RETRIBUCIONES ──────────────────────────────────────────── */}
       <section style={{ padding: '52px 0', borderBottom: '1px solid var(--rule)' }}>
