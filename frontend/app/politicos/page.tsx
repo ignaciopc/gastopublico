@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { formatEUR } from '@/lib/formatters';
+import GabineteGrid from '@/components/ui/GabineteGrid';
 
 export const revalidate = 86400;
 
@@ -98,6 +99,8 @@ export default function PoliticosPage() {
           </div>
         </div>
       </section>
+
+      <GabineteGrid />
 
       {/* ── TABLA RETRIBUCIONES ──────────────────────────────────────────── */}
       <section style={{ padding: '52px 0', borderBottom: '1px solid var(--rule)' }}>
