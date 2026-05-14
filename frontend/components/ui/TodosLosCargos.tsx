@@ -162,6 +162,19 @@ const ALL_CARGOS: Cargo[] = [
   ...SECRETARIOS_ESTADO,
 ].sort((a, b) => b.salario - a.salario);
 
+// Coste anual total por partido (suma de todos los salarios en este componente)
+const COSTE_PARTIDO: { partido: string; total: number; color: string }[] = (() => {
+  const map: Record<string, number> = {};
+  for (const c of ALL_CARGOS) {
+    map[c.partido] = (map[c.partido] ?? 0) + c.salario;
+  }
+  return Object.entries(map)
+    .map(([partido, total]) => ({ partido, total, color: PARTIDO_COLOR[partido as Partido] ?? '#666' }))
+    .sort((a, b) => b.total - a.total);
+})();
+
+const COSTE_MAX = COSTE_PARTIDO[0]?.total ?? 1;
+
 const INITIAL_LIMIT = 30;
 
 export default function TodosLosCargos() {
@@ -169,16 +182,23 @@ export default function TodosLosCargos() {
   const [tab, setTab] = useState<Categoria>('ccaa');
   const [filtroPartido, setFiltroPartido] = useState<Partido | 'Todos'>('Todos');
   const [busqueda, setBusqueda] = useState('');
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
   const tabActual = TABS.find(t => t.key === tab)!;
-  const datosFiltrados = tabActual.datos.filter(c => {
-    const okPartido = filtroPartido === 'Todos' || c.partido === filtroPartido;
-    const okBusqueda = busqueda === '' ||
-      c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      c.cargo.toLowerCase().includes(busqueda.toLowerCase()) ||
-      (c.territorio ?? '').toLowerCase().includes(busqueda.toLowerCase());
-    return okPartido && okBusqueda;
-  });
+  const datosFiltrados = tabActual.datos
+    .filter(c => {
+      const okPartido = filtroPartido === 'Todos' || c.partido === filtroPartido;
+      const okBusqueda = busqueda === '' ||
+        c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        c.cargo.toLowerCase().includes(busqueda.toLowerCase()) ||
+        (c.territorio ?? '').toLowerCase().includes(busqueda.toLowerCase());
+      return okPartido && okBusqueda;
+    })
+    .sort((a, b) => sortDir === 'desc' ? b.salario - a.salario : a.salario - b.salario);
+
+  const top30Sorted = [...ALL_CARGOS]
+    .sort((a, b) => sortDir === 'desc' ? b.salario - a.salario : a.salario - b.salario)
+    .slice(0, INITIAL_LIMIT);
 
   const partidosEnTab = [...new Set(tabActual.datos.map(c => c.partido))].sort();
 
@@ -187,6 +207,15 @@ export default function TodosLosCargos() {
     textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'left',
     borderBottom: '1px solid var(--card-border)', whiteSpace: 'nowrap',
   };
+
+  const SortHeader = () => (
+    <th
+      onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')}
+      style={{ ...thStyle, textAlign: 'right', cursor: 'pointer', userSelect: 'none' }}
+    >
+      Salario bruto/año {sortDir === 'desc' ? '▼' : '▲'}
+    </th>
+  );
 
   function CargosTable({ datos, showCategoria }: { datos: Cargo[]; showCategoria?: boolean }) {
     return (
@@ -200,7 +229,7 @@ export default function TodosLosCargos() {
               {!showCategoria && tab === 'alcalde' && <th style={thStyle}>Ciudad</th>}
               <th style={thStyle}>Cargo</th>
               <th style={{ ...thStyle, textAlign: 'center' }}>Partido</th>
-              <th style={{ ...thStyle, textAlign: 'right' }}>Salario bruto/año</th>
+              <SortHeader />
             </tr>
           </thead>
           <tbody>
@@ -260,9 +289,32 @@ export default function TodosLosCargos() {
           </div>
         </div>
 
+        {/* Coste por partido */}
+        <div style={{ marginBottom: 32, padding: '20px 24px', border: '1px solid var(--card-border)', borderRadius: 6, background: 'var(--background)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 14 }}>
+            Coste anual en sueldos públicos por partido — {ALL_CARGOS.length} cargos
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {COSTE_PARTIDO.map(({ partido, total, color }) => (
+              <div key={partido} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 80, fontSize: 11, fontWeight: 700, color, textAlign: 'right', flexShrink: 0 }}>{partido}</div>
+                <div style={{ flex: 1, height: 10, borderRadius: 2, background: 'var(--rule)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${(total / COSTE_MAX) * 100}%`, background: color, borderRadius: 2, transition: 'width 0.4s' }} />
+                </div>
+                <div style={{ width: 120, fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono), monospace', color: 'var(--bad)', textAlign: 'right', flexShrink: 0 }}>
+                  {total.toLocaleString('es-ES')} €/año
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 10 }}>
+            Suma de salarios brutos de todos los cargos listados. No incluye complementos, dietas ni asesores. Las entradas &quot;Otros N MEPs&quot; se cuentan como un cargo.
+          </div>
+        </div>
+
         {!verTodos ? (
           <>
-            <CargosTable datos={ALL_CARGOS.slice(0, INITIAL_LIMIT)} showCategoria />
+            <CargosTable datos={top30Sorted} showCategoria />
             <div style={{ textAlign: 'center', marginTop: 20 }}>
               <button
                 onClick={() => setVerTodos(true)}
