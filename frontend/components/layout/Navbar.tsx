@@ -35,9 +35,16 @@ const NAV: NavEntry[] = [
       { href: '/sanidad', label: 'Sanidad' },
       { href: '/educacion', label: 'Educación' },
       { href: '/seguridad', label: 'Seguridad' },
+      { href: '/inmigracion', label: 'Inmigración' },
     ],
   },
-  { href: '/gobierno', label: 'Gobierno' },
+  {
+    label: 'Gobierno',
+    items: [
+      { href: '/gobierno', label: 'Análisis de gobierno' },
+      { href: '/politicos', label: 'Políticos y cargos' },
+    ],
+  },
   {
     label: 'Datos',
     items: [

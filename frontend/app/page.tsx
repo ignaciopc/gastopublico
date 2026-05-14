@@ -34,14 +34,19 @@ const FEATURES = [
 
 const PARTIDA_COLORS = ['var(--accent)', '#8a1428', '#6b6b66', '#3a3a35', '#1a1a18'];
 
-type InmigracionPartida = { label: string; importe: number; nota: string; tipo: 'oficial' | 'estimacion' };
-const INMIGRACION_PARTIDAS: InmigracionPartida[] = [
-  { label: 'Acogida humanitaria y asilo (Prog. 231N)', importe: 496_100_000, nota: 'Centros acogida, CIEs, CEAR, Cruz Roja', tipo: 'oficial' },
-  { label: 'MENA — Menores no acompañados', importe: 420_000_000, nota: 'Transferencias a CCAA para tutela y acogida', tipo: 'oficial' },
-  { label: 'FAMI — Fondo UE Asilo y Migración', importe: 267_200_000, nota: 'Fondos europeos gestionados por España', tipo: 'oficial' },
-  { label: 'Integración social de inmigrantes', importe: 185_000_000, nota: 'Planes de integración, formación, inserción', tipo: 'oficial' },
-  { label: 'Gestión de flujos migratorios (Prog. 231E)', importe: 124_300_000, nota: 'Tramitación visados, regularizaciones', tipo: 'oficial' },
-  { label: 'Control de fronteras (parte asignada)', importe: 354_400_000, nota: 'Guardia Civil + Policía Nacional', tipo: 'estimacion' },
+const GASTO_MENSUAL = [
+  { mes: 'Ene', pct: 6.8, nota: 'Inicio lento — liquidaciones año anterior' },
+  { mes: 'Feb', pct: 7.2, nota: '' },
+  { mes: 'Mar', pct: 8.0, nota: '' },
+  { mes: 'Abr', pct: 8.1, nota: '' },
+  { mes: 'May', pct: 8.4, nota: '' },
+  { mes: 'Jun', pct: 8.8, nota: 'Cierre 1er semestre' },
+  { mes: 'Jul', pct: 8.3, nota: '' },
+  { mes: 'Ago', pct: 7.5, nota: 'Agosto — mínimo actividad' },
+  { mes: 'Sep', pct: 8.6, nota: '' },
+  { mes: 'Oct', pct: 8.7, nota: '' },
+  { mes: 'Nov', pct: 9.2, nota: '' },
+  { mes: 'Dic', pct: 10.4, nota: 'Efecto fin de año — pico máximo' },
 ];
 
 async function getData() {
@@ -559,94 +564,122 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── GASTO EN INMIGRACIÓN ────────────────────────────────────────── */}
-      <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)' }}>
+      {/* ── CUÁNDO SE GASTA ─────────────────────────────────────────────── */}
+      <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)', background: 'var(--card)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 6 }}>PGE 2024 · Secretaría de Estado de Migraciones</div>
-              <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-                ¿Cuánto gastamos en inmigración?
+              <div className="eyebrow" style={{ marginBottom: 6 }}>IGAE · Ejecución mensual 2024</div>
+              <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+                ¿Cuándo gasta el Estado?
               </h2>
-              <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: 0, maxWidth: 640, lineHeight: 1.55 }}>
-                Partidas directas del Presupuesto General del Estado 2024. No incluye el gasto
-                de las Comunidades Autónomas en educación, sanidad y servicios sociales para
-                personas inmigrantes, que eleva el coste total estimado a más de 6.000 M€/año.
+              <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: 0 }}>
+                Diciembre concentra el doble de gasto que enero. El "efecto fin de año" es estructural.
               </p>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono), monospace', letterSpacing: '0.08em', marginBottom: 4 }}>TOTAL PARTIDAS DIRECTAS</div>
-              <div style={{ fontSize: 38, fontWeight: 700, fontFamily: 'var(--font-mono), monospace', letterSpacing: '-0.03em', color: 'var(--bad)' }}>
-                1.847 M€
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                193 € por habitante · 217 € por inmigrante
-              </div>
-            </div>
+            <Link href="/presupuesto" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
+              Ver ejecución mensual →
+            </Link>
           </div>
 
-          {/* Barras de partidas */}
-          <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, overflow: 'hidden', marginBottom: 16 }}>
-            {INMIGRACION_PARTIDAS.map((p, i) => {
-              const maxImporte = INMIGRACION_PARTIDAS[0].importe;
-              const pct = Math.round((p.importe / maxImporte) * 100);
-              const total = INMIGRACION_PARTIDAS.reduce((s, x) => s + x.importe, 0);
-              const share = ((p.importe / total) * 100).toFixed(1);
+          {/* Bar chart mensual */}
+          <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 140, marginBottom: 8 }}>
+            {GASTO_MENSUAL.map((m) => {
+              const maxPct = 10.4;
+              const h = Math.round((m.pct / maxPct) * 100);
+              const isPeak = m.pct >= 10;
+              const isLow = m.pct <= 7.2;
               return (
-                <div key={p.label} style={{
-                  padding: '16px 20px',
-                  borderBottom: i < INMIGRACION_PARTIDAS.length - 1 ? '1px solid var(--rule)' : 0,
-                  background: 'var(--card)',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8, gap: 16, flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 600 }}>{p.label}</span>
-                      <span style={{
-                        fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
-                        textTransform: 'uppercase', padding: '2px 6px', borderRadius: 2,
-                        border: `1px solid ${p.tipo === 'oficial' ? 'rgba(39,174,96,0.5)' : 'rgba(230,126,34,0.5)'}`,
-                        color: p.tipo === 'oficial' ? '#27ae60' : '#e67e22',
-                        background: p.tipo === 'oficial' ? 'rgba(39,174,96,0.06)' : 'rgba(230,126,34,0.06)',
-                        fontFamily: 'var(--font-mono), monospace', flexShrink: 0,
-                      }}>
-                        {p.tipo === 'oficial' ? 'OFICIAL' : 'ESTIMACIÓN'}
-                      </span>
-                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>{p.nota}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 16, alignItems: 'baseline', flexShrink: 0 }}>
-                      <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono), monospace' }}>{share}%</span>
-                      <span style={{ fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-mono), monospace' }}>
-                        {formatEUR(p.importe, true)}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ background: 'var(--card-border)', borderRadius: 2, height: 6, overflow: 'hidden' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: 'var(--accent)', borderRadius: 2, opacity: 0.8 + i * 0.02 }} />
-                  </div>
+                <div key={m.mes} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <span style={{
+                    fontSize: 9, fontFamily: 'var(--font-mono), monospace', fontWeight: 700,
+                    color: isPeak ? 'var(--bad)' : isLow ? 'var(--muted)' : 'var(--muted-strong)',
+                  }}>{m.pct}%</span>
+                  <div style={{
+                    width: '100%', height: `${h}%`,
+                    background: isPeak ? '#8a1428' : isLow ? 'var(--card-border)' : 'var(--accent)',
+                    borderRadius: '3px 3px 0 0',
+                    border: isPeak ? '1px solid rgba(239,77,104,0.4)' : 'none',
+                    minHeight: 4,
+                  }} />
                 </div>
               );
             })}
           </div>
-
-          {/* Nota y contexto */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
-            {[
-              { label: 'Inmigrantes en España (2024)', value: '8,5 M', sub: '17,9% de la población total — INE' },
-              { label: 'Solicitudes de asilo 2024', value: '163.220', sub: '+12% respecto a 2023 — Ministerio Interior' },
-              { label: 'MENA bajo tutela estatal', value: '~47.000', sub: 'Distribuidos entre CCAA — estimación 2024' },
-              { label: 'Gasto estimado total (Estado + CCAA)', value: '+6.000 M€', sub: 'Incluyendo sanidad, educación y servicios sociales' },
-            ].map(stat => (
-              <div key={stat.label} style={{ padding: '14px 16px', background: 'var(--card)', border: '1px solid var(--card-border)', borderRadius: 4 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>{stat.label}</div>
-                <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono), monospace', letterSpacing: '-0.02em', marginBottom: 4 }}>{stat.value}</div>
-                <div style={{ fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.4 }}>{stat.sub}</div>
+          <div style={{ display: 'flex', gap: 6, borderTop: '1px solid var(--rule)', paddingTop: 6, marginBottom: 24 }}>
+            {GASTO_MENSUAL.map(m => (
+              <div key={m.mes} style={{ flex: 1, textAlign: 'center', fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono), monospace' }}>
+                {m.mes}
               </div>
             ))}
           </div>
 
-          <p style={{ fontSize: 12, color: 'var(--muted)', margin: '14px 0 0', lineHeight: 1.5 }}>
-            Fuentes: PGE 2024 (Ministerio de Hacienda), IGAE, INE, Ministerio de Interior. La partida de control de fronteras es una estimación basada en el presupuesto de Guardia Civil y Policía Nacional prorrateado por actividad migratoria.
-          </p>
+          {/* Fechas clave */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
+            {[
+              { fecha: 'Día 1 de cada mes', concepto: 'Pago de pensiones', detalle: '14,5 millones de pensionistas · 12.500 M€/mes', color: 'var(--accent)' },
+              { fecha: 'Último hábil del mes', concepto: 'Nóminas de funcionarios', detalle: '3,5 millones de empleados públicos · 4.800 M€/mes', color: 'var(--accent)' },
+              { fecha: '1 abr – 30 jun', concepto: 'Campaña IRPF', detalle: 'El mayor ingreso del año. +94.000 M€ recaudados en 2024', color: '#2563eb' },
+              { fecha: 'Sep – Nov', concepto: 'Aceleración presupuestaria', detalle: 'Las unidades gastadoras aceleran para evitar devolución del crédito', color: '#e67e22' },
+              { fecha: 'Diciembre', concepto: 'Pico de gasto: "efecto fin de año"', detalle: '10,4% del gasto anual en un solo mes. Récord sistemático desde 2000', color: '#8a1428' },
+              { fecha: '31 de diciembre', concepto: 'Cierre del ejercicio', detalle: 'El crédito no ejecutado se devuelve al Tesoro o se incorpora al año siguiente', color: 'var(--muted)' },
+            ].map(ev => (
+              <div key={ev.concepto} style={{ padding: '14px 16px', background: 'var(--background)', border: '1px solid var(--card-border)', borderRadius: 4, display: 'flex', gap: 12 }}>
+                <div style={{ width: 3, borderRadius: 2, background: ev.color, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: 10, fontFamily: 'var(--font-mono), monospace', fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: 4, textTransform: 'uppercase' }}>{ev.fecha}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 3 }}>{ev.concepto}</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.4 }}>{ev.detalle}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CARD LINKS: INMIGRACIÓN + POLÍTICOS ─────────────────────────── */}
+      <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <div className="eyebrow" style={{ marginBottom: 6 }}>Más análisis</div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 22px', letterSpacing: '-0.02em' }}>
+            Datos que el gobierno prefiere que no busques
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 1, border: '1px solid var(--card-border)', borderRadius: 4, overflow: 'hidden' }}>
+            <Link href="/inmigracion" style={{ display: 'block', padding: '28px 26px', background: 'var(--card)', textDecoration: 'none', color: 'inherit', borderRight: '1px solid var(--card-border)' }}>
+              <div className="eyebrow" style={{ marginBottom: 10 }}>PGE 2024 · CCAA · Estimaciones</div>
+              <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, letterSpacing: '-0.01em' }}>Gasto en inmigración</div>
+              <p style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--muted-strong)', margin: '0 0 16px' }}>
+                1.847 M€ en partidas directas del Estado. Más de 6.000 M€ si sumamos sanidad,
+                educación y servicios sociales de las CCAA. Partida a partida, cifra a cifra.
+              </p>
+              <div style={{ display: 'flex', gap: 20, marginBottom: 16 }}>
+                {[{ v: '1.847 M€', l: 'Estado (directo)' }, { v: '+6.000 M€', l: 'Total estimado' }, { v: '8,5 M', l: 'Inmigrantes' }].map(k => (
+                  <div key={k.l}>
+                    <div style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-mono), monospace', color: 'var(--bad)', letterSpacing: '-0.02em' }}>{k.v}</div>
+                    <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>{k.l}</div>
+                  </div>
+                ))}
+              </div>
+              <span style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>Ver análisis completo →</span>
+            </Link>
+            <Link href="/politicos" style={{ display: 'block', padding: '28px 26px', background: 'var(--card)', textDecoration: 'none', color: 'inherit' }}>
+              <div className="eyebrow" style={{ marginBottom: 10 }}>BOE · Portal Transparencia · 2024</div>
+              <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, letterSpacing: '-0.01em' }}>Sueldos y cargos de los políticos</div>
+              <p style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--muted-strong)', margin: '0 0 16px' }}>
+                Retribuciones del presidente, ministros y altos cargos. 740 asesores a dedo.
+                Coches oficiales, viajes y pensiones vitalicias. Información pública, en un solo lugar.
+              </p>
+              <div style={{ display: 'flex', gap: 20, marginBottom: 16 }}>
+                {[{ v: '678 M€', l: 'Coste total altos cargos' }, { v: '740', l: 'Asesores nombrados' }, { v: '96.179 €', l: 'Sueldo del presidente' }].map(k => (
+                  <div key={k.l}>
+                    <div style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-mono), monospace', color: 'var(--bad)', letterSpacing: '-0.02em' }}>{k.v}</div>
+                    <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>{k.l}</div>
+                  </div>
+                ))}
+              </div>
+              <span style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>Ver todos los datos →</span>
+            </Link>
+          </div>
         </div>
       </section>
 
