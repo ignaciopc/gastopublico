@@ -148,20 +148,30 @@ const TABS: { key: Categoria; label: string; datos: Cargo[] }[] = [
   { key: 'eurodiputado',  label: `Eurodiputados españoles (${EURODIPUTADOS.length})`,          datos: EURODIPUTADOS },
 ];
 
-const ALL_PARTIDOS = [...new Set([
-  ...SECRETARIOS_ESTADO.map(c => c.partido),
-  ...PRESIDENTES_CCAA.map(c => c.partido),
-  ...ALCALDES.map(c => c.partido),
-  ...EURODIPUTADOS.map(c => c.partido),
-])].sort();
+const CATEGORIA_LABEL: Record<Categoria, string> = {
+  sec_estado: 'Sec. Estado',
+  ccaa: 'Pres. CCAA',
+  alcalde: 'Alcalde',
+  eurodiputado: 'Eurodiputado',
+};
+
+const ALL_CARGOS: Cargo[] = [
+  ...EURODIPUTADOS,
+  ...ALCALDES,
+  ...PRESIDENTES_CCAA,
+  ...SECRETARIOS_ESTADO,
+].sort((a, b) => b.salario - a.salario);
+
+const INITIAL_LIMIT = 30;
 
 export default function TodosLosCargos() {
+  const [verTodos, setVerTodos] = useState(false);
   const [tab, setTab] = useState<Categoria>('ccaa');
   const [filtroPartido, setFiltroPartido] = useState<Partido | 'Todos'>('Todos');
   const [busqueda, setBusqueda] = useState('');
 
   const tabActual = TABS.find(t => t.key === tab)!;
-  const datos = tabActual.datos.filter(c => {
+  const datosFiltrados = tabActual.datos.filter(c => {
     const okPartido = filtroPartido === 'Todos' || c.partido === filtroPartido;
     const okBusqueda = busqueda === '' ||
       c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -171,6 +181,69 @@ export default function TodosLosCargos() {
   });
 
   const partidosEnTab = [...new Set(tabActual.datos.map(c => c.partido))].sort();
+
+  const thStyle: React.CSSProperties = {
+    padding: '9px 16px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+    textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'left',
+    borderBottom: '1px solid var(--card-border)', whiteSpace: 'nowrap',
+  };
+
+  function CargosTable({ datos, showCategoria }: { datos: Cargo[]; showCategoria?: boolean }) {
+    return (
+      <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: 'var(--background)' }}>
+              <th style={thStyle}>Nombre</th>
+              {showCategoria && <th style={{ ...thStyle, textAlign: 'center' }}>Tipo</th>}
+              {!showCategoria && tab === 'ccaa' && <th style={thStyle}>CCAA</th>}
+              {!showCategoria && tab === 'alcalde' && <th style={thStyle}>Ciudad</th>}
+              <th style={thStyle}>Cargo</th>
+              <th style={{ ...thStyle, textAlign: 'center' }}>Partido</th>
+              <th style={{ ...thStyle, textAlign: 'right' }}>Salario bruto/año</th>
+            </tr>
+          </thead>
+          <tbody>
+            {datos.map((c, i) => {
+              const color = PARTIDO_COLOR[c.partido] ?? '#666';
+              return (
+                <tr key={`${c.nombre}-${i}`} style={{ background: i % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
+                  <td style={{ padding: '10px 16px', fontSize: 13.5, fontWeight: 600, borderBottom: '1px solid var(--rule)' }}>{c.nombre}</td>
+                  {showCategoria && (
+                    <td style={{ padding: '10px 14px', textAlign: 'center', borderBottom: '1px solid var(--rule)' }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted-strong)', whiteSpace: 'nowrap' }}>
+                        {CATEGORIA_LABEL[c.categoria]}
+                      </span>
+                    </td>
+                  )}
+                  {!showCategoria && tab === 'ccaa' && <td style={{ padding: '10px 16px', fontSize: 12.5, color: 'var(--muted-strong)', borderBottom: '1px solid var(--rule)', whiteSpace: 'nowrap' }}>{c.territorio}</td>}
+                  {!showCategoria && tab === 'alcalde' && <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--muted)', borderBottom: '1px solid var(--rule)' }}>{c.territorio}</td>}
+                  <td style={{ padding: '10px 16px', fontSize: 12.5, color: 'var(--muted-strong)', borderBottom: '1px solid var(--rule)' }}>{c.cargo}</td>
+                  <td style={{ padding: '10px 14px', textAlign: 'center', borderBottom: '1px solid var(--rule)' }}>
+                    <span style={{
+                      display: 'inline-block', fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
+                      textTransform: 'uppercase', padding: '2px 7px', borderRadius: 2,
+                      border: `1px solid ${color}55`, color, background: `${color}14`,
+                    }}>
+                      {c.partido}
+                    </span>
+                  </td>
+                  <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--font-mono), monospace', fontWeight: 700, fontSize: 13.5, borderBottom: '1px solid var(--rule)', color: 'var(--bad)', whiteSpace: 'nowrap' }}>
+                    {c.salario.toLocaleString('es-ES')} €
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {datos.length === 0 && (
+          <div style={{ padding: '32px', textAlign: 'center', fontSize: 14, color: 'var(--muted)' }}>
+            No hay resultados.
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <section style={{ padding: '52px 0', borderBottom: '1px solid var(--rule)', background: 'var(--card)' }}>
@@ -187,115 +260,106 @@ export default function TodosLosCargos() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', marginBottom: 20, borderBottom: '1px solid var(--card-border)' }}>
-          {TABS.map(t => (
-            <button
-              key={t.key}
-              onClick={() => { setTab(t.key); setFiltroPartido('Todos'); setBusqueda(''); }}
-              style={{
-                padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                border: 'none', borderBottom: tab === t.key ? '2px solid var(--accent)' : '2px solid transparent',
-                background: 'transparent',
-                color: tab === t.key ? 'var(--accent)' : 'var(--muted-strong)',
-                marginBottom: -1,
-                transition: 'color 0.15s',
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Filtros partido + buscador */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
-          <input
-            type="text"
-            value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
-            placeholder="Buscar nombre o cargo..."
-            style={{
-              padding: '6px 12px', borderRadius: 4, fontSize: 13,
-              border: '1px solid var(--card-border)', background: 'var(--background)',
-              color: 'var(--foreground)', outline: 'none', minWidth: 200,
-            }}
-          />
-          <button
-            onClick={() => setFiltroPartido('Todos')}
-            style={{
-              padding: '6px 12px', borderRadius: 4, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-              border: filtroPartido === 'Todos' ? '1px solid var(--foreground)' : '1px solid var(--card-border)',
-              background: filtroPartido === 'Todos' ? 'var(--foreground)' : 'transparent',
-              color: filtroPartido === 'Todos' ? 'var(--background)' : 'var(--muted-strong)',
-            }}
-          >
-            Todos
-          </button>
-          {partidosEnTab.map(p => {
-            const color = PARTIDO_COLOR[p] ?? '#666';
-            const active = filtroPartido === p;
-            return (
+        {!verTodos ? (
+          <>
+            <CargosTable datos={ALL_CARGOS.slice(0, INITIAL_LIMIT)} showCategoria />
+            <div style={{ textAlign: 'center', marginTop: 20 }}>
               <button
-                key={p}
-                onClick={() => setFiltroPartido(active ? 'Todos' : p as Partido)}
+                onClick={() => setVerTodos(true)}
                 style={{
-                  padding: '5px 12px', borderRadius: 4, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                  border: `1px solid ${active ? color : `${color}55`}`,
-                  background: active ? color : `${color}14`,
-                  color: active ? '#fff' : color,
+                  padding: '10px 28px', borderRadius: 4, fontSize: 13.5, fontWeight: 700, cursor: 'pointer',
+                  border: '1px solid var(--card-border)',
+                  background: 'var(--background)',
+                  color: 'var(--foreground)',
                 }}
               >
-                {p}
+                Ver todos los {ALL_CARGOS.length} cargos →
               </button>
-            );
-          })}
-        </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', marginBottom: 20, borderBottom: '1px solid var(--card-border)' }}>
+              {TABS.map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => { setTab(t.key); setFiltroPartido('Todos'); setBusqueda(''); }}
+                  style={{
+                    padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    border: 'none', borderBottom: tab === t.key ? '2px solid var(--accent)' : '2px solid transparent',
+                    background: 'transparent',
+                    color: tab === t.key ? 'var(--accent)' : 'var(--muted-strong)',
+                    marginBottom: -1,
+                    transition: 'color 0.15s',
+                  }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-        {/* Tabla */}
-        <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: 'var(--background)' }}>
-                <th style={{ padding: '9px 16px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'left', borderBottom: '1px solid var(--card-border)' }}>Nombre</th>
-                {tab === 'ccaa' && <th style={{ padding: '9px 16px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'left', borderBottom: '1px solid var(--card-border)', whiteSpace: 'nowrap' }}>CCAA</th>}
-                {tab === 'alcalde' && <th style={{ padding: '9px 16px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'left', borderBottom: '1px solid var(--card-border)' }}>Ciudad</th>}
-                <th style={{ padding: '9px 16px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'left', borderBottom: '1px solid var(--card-border)' }}>Cargo</th>
-                <th style={{ padding: '9px 14px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'center', borderBottom: '1px solid var(--card-border)', whiteSpace: 'nowrap' }}>Partido</th>
-                <th style={{ padding: '9px 16px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'right', borderBottom: '1px solid var(--card-border)', whiteSpace: 'nowrap' }}>Salario bruto/año</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datos.map((c, i) => {
-                const color = PARTIDO_COLOR[c.partido] ?? '#666';
+            {/* Filtros partido + buscador */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
+              <input
+                type="text"
+                value={busqueda}
+                onChange={e => setBusqueda(e.target.value)}
+                placeholder="Buscar nombre o cargo..."
+                style={{
+                  padding: '6px 12px', borderRadius: 4, fontSize: 13,
+                  border: '1px solid var(--card-border)', background: 'var(--background)',
+                  color: 'var(--foreground)', outline: 'none', minWidth: 200,
+                }}
+              />
+              <button
+                onClick={() => setFiltroPartido('Todos')}
+                style={{
+                  padding: '6px 12px', borderRadius: 4, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+                  border: filtroPartido === 'Todos' ? '1px solid var(--foreground)' : '1px solid var(--card-border)',
+                  background: filtroPartido === 'Todos' ? 'var(--foreground)' : 'transparent',
+                  color: filtroPartido === 'Todos' ? 'var(--background)' : 'var(--muted-strong)',
+                }}
+              >
+                Todos
+              </button>
+              {partidosEnTab.map(p => {
+                const color = PARTIDO_COLOR[p] ?? '#666';
+                const active = filtroPartido === p;
                 return (
-                  <tr key={`${c.nombre}-${i}`} style={{ background: i % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
-                    <td style={{ padding: '10px 16px', fontSize: 13.5, fontWeight: 600, borderBottom: '1px solid var(--rule)' }}>{c.nombre}</td>
-                    {tab === 'ccaa' && <td style={{ padding: '10px 16px', fontSize: 12.5, color: 'var(--muted-strong)', borderBottom: '1px solid var(--rule)', whiteSpace: 'nowrap' }}>{c.territorio}</td>}
-                    {tab === 'alcalde' && <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--muted)', borderBottom: '1px solid var(--rule)' }}>{c.territorio}</td>}
-                    <td style={{ padding: '10px 16px', fontSize: 12.5, color: 'var(--muted-strong)', borderBottom: '1px solid var(--rule)' }}>{c.cargo}</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', borderBottom: '1px solid var(--rule)' }}>
-                      <span style={{
-                        display: 'inline-block', fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
-                        textTransform: 'uppercase', padding: '2px 7px', borderRadius: 2,
-                        border: `1px solid ${color}55`, color, background: `${color}14`,
-                      }}>
-                        {c.partido}
-                      </span>
-                    </td>
-                    <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--font-mono), monospace', fontWeight: 700, fontSize: 13.5, borderBottom: '1px solid var(--rule)', color: 'var(--bad)', whiteSpace: 'nowrap' }}>
-                      {c.salario.toLocaleString('es-ES')} €
-                    </td>
-                  </tr>
+                  <button
+                    key={p}
+                    onClick={() => setFiltroPartido(active ? 'Todos' : p as Partido)}
+                    style={{
+                      padding: '5px 12px', borderRadius: 4, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                      border: `1px solid ${active ? color : `${color}55`}`,
+                      background: active ? color : `${color}14`,
+                      color: active ? '#fff' : color,
+                    }}
+                  >
+                    {p}
+                  </button>
                 );
               })}
-            </tbody>
-          </table>
-          {datos.length === 0 && (
-            <div style={{ padding: '32px', textAlign: 'center', fontSize: 14, color: 'var(--muted)' }}>
-              No hay resultados.
             </div>
-          )}
-        </div>
+
+            <CargosTable datos={datosFiltrados} />
+
+            <div style={{ textAlign: 'center', marginTop: 20 }}>
+              <button
+                onClick={() => setVerTodos(false)}
+                style={{
+                  padding: '8px 20px', borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  border: '1px solid var(--card-border)',
+                  background: 'transparent',
+                  color: 'var(--muted-strong)',
+                }}
+              >
+                ↑ Ver menos
+              </button>
+            </div>
+          </>
+        )}
 
         <p style={{ fontSize: 11.5, color: 'var(--muted)', margin: '14px 0 0', lineHeight: 1.55 }}>
           Datos 2024. Salarios brutos según BOE y presupuestos autonómicos. Los salarios de eurodiputados son el estipendio base del PE (9.000 €/mes brutos) sin contar las dietas por asistencia (~340 €/día) ni asignaciones de gastos generales (~4.520 €/mes). ·
