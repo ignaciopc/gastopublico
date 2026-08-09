@@ -768,31 +768,6 @@ export default function PensionesPage() {
         Eurostat — ESSPROS · Banco de España — Informe Anual · INE — Padrón Municipal y Proyecciones de Población
       </div>
       </div>
-
-      {/* ── QUÉ SE DEBERÍA HACER ─────────────────────────────────────── */}
-      <section style={{ background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '52px 0 64px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué se debería hacer?</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 32px' }}>
-            Cinco reformas para que el sistema sea sostenible en 2050.
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {[
-              { titulo: 'Ampliar el período de cómputo a 35 años', detalle: 'Calcular la pensión sobre los últimos 35 años (en lugar de 25 actuales) reduce la pensión media inicial pero refleja mejor la carrera real cotizada y desincentiva la evasión en los últimos años de trabajo.', impacto: 'Reducción del gasto estimado: ~3.000 M€/año', color: '#ef4d68' },
-              { titulo: 'Separar prestaciones contributivas y no contributivas', detalle: 'El sistema contributivo debería financiarse solo con cotizaciones. Las pensiones no contributivas deben financiarse desde Presupuestos Generales vía impuestos. Ahora se mezclan, distorsionando la sostenibilidad.', impacto: 'Transparencia + 10.000 M€ explícitos en PGE', color: '#e67e22' },
-              { titulo: 'Incentivo fiscal real al ahorro privado', detalle: 'Los planes de pensiones privados en España suman ~80.000 M€, frente a 1,3 billones en el Reino Unido. Una deducción progresiva real en IRPF descargaría al sistema público.', impacto: 'Reducir dependencia pública en 2–3 pp PIB a largo plazo', color: '#2563eb' },
-              { titulo: 'Implantar el Factor de Equidad Intergeneracional', detalle: 'La derogación del Factor de Sostenibilidad en 2021 eliminó el mecanismo que ajustaba automáticamente la cuantía inicial de la pensión a la esperanza de vida. Sin él, cada año de mayor longevidad es más gasto sin ajuste.', impacto: 'Ahorro estructural estimado: 4.000–8.000 M€/año en 2035', color: '#8e44ad' },
-              { titulo: 'Incentivar la inmigración laboral cualificada', detalle: 'Con 2,54 cotizantes por pensionista, necesitamos más trabajadores jóvenes. La inmigración regulada y empleada formalmente es el único camino realista a corto plazo mientras la demografía nacional no repunta.', impacto: '+500.000 cotizantes = ~2.500 M€/año más en ingresos SS', color: '#059669' },
-            ].map(m => (
-              <div key={m.titulo} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.color}30`, borderRadius: 6, padding: '20px 18px', borderTop: `3px solid ${m.color}` }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#ededeb', marginBottom: 8, lineHeight: 1.35 }}>{m.titulo}</div>
-                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12 }}>{m.detalle}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: m.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'var(--font-mono), monospace' }}>→ {m.impacto}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

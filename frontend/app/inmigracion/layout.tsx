@@ -1,30 +1,28 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Gasto en Inmigración – Datos Oficiales PGE 2024',
+  title: 'Migración y asilo en el PGE 2024 – Partidas presupuestarias',
   description:
-    '1.847 M€ en partidas directas del Estado. Más de 6.000 M€ sumando sanidad, educación y servicios sociales de las CCAA. Desglose completo del gasto en inmigración en España con datos del PGE 2024.',
+    'Las cinco partidas del Presupuesto General del Estado 2024 destinadas a acogida, asilo, integración y gestión de flujos migratorios, con su programa presupuestario e importe. 1.492,6 M€ en total.',
   keywords: [
-    'gasto inmigración España 2024',
-    'presupuesto inmigración PGE',
-    'MENA coste tutela',
-    'FAMI fondo asilo migración',
-    'inmigrantes España gasto público',
-    'coste inmigración comunidades autónomas',
-    'acogida humanitaria presupuesto',
-    'gasto público inmigración datos oficiales',
+    'partidas presupuestarias migración España',
+    'presupuesto asilo PGE 2024',
+    'programa 231N acogida humanitaria',
+    'FAMI fondo asilo migración integración',
+    'gasto público migración datos oficiales',
+    'menores migrantes no acompañados presupuesto',
   ],
   openGraph: {
-    title: 'Gasto en Inmigración en España – PGE 2024 · Datos Oficiales',
-    description: '1.847 M€ directos + 6.000 M€ estimados con CCAA. MENA, asilo, FAMI, integración. Partida a partida.',
+    title: 'Migración y asilo en el PGE 2024 · Partidas presupuestarias',
+    description: '1.492,6 M€ en cinco partidas identificadas de los programas 231N, 231B y 231E. Importe y programa presupuestario de cada una.',
     url: 'https://gastopublico.es/inmigracion',
-    images: [{ url: '/api/og?title=Gasto%20en%20Inmigraci%C3%B3n&sub=1.847%20M%E2%82%AC%20directos%20%C2%B7%20%2B6.000%20M%E2%82%AC%20estimados%20con%20CCAA%20%C2%B7%20PGE%202024', width: 1200, height: 630 }],
+    images: [{ url: '/api/og?title=Migraci%C3%B3n%20y%20asilo%20en%20el%20PGE%202024&sub=1.492%2C6%20M%E2%82%AC%20en%20cinco%20partidas%20%C2%B7%20Programas%20231N%2C%20231B%20y%20231E', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Gasto en Inmigración – PGE 2024',
-    description: '1.847 M€ directos. Más de 6.000 M€ con CCAA. MENA, FAMI, asilo, integración. Datos oficiales.',
-    images: ['/api/og?title=Gasto%20en%20Inmigraci%C3%B3n&sub=1.847%20M%E2%82%AC%20directos%20%C2%B7%20%2B6.000%20M%E2%82%AC%20estimados%20con%20CCAA%20%C2%B7%20PGE%202024'],
+    title: 'Migración y asilo en el PGE 2024',
+    description: '1.492,6 M€ en cinco partidas identificadas de los programas 231N, 231B y 231E.',
+    images: ['/api/og?title=Migraci%C3%B3n%20y%20asilo%20en%20el%20PGE%202024&sub=1.492%2C6%20M%E2%82%AC%20en%20cinco%20partidas%20%C2%B7%20Programas%20231N%2C%20231B%20y%20231E'],
   },
   alternates: { canonical: 'https://gastopublico.es/inmigracion' },
 };

@@ -334,31 +334,6 @@ export default function EducacionPage() {
         INE — Encuesta de Población Activa (módulo de educación)
       </div>
       </div>{/* cierre del wrapper max-width */}
-
-      {/* ── QUÉ SE DEBERÍA HACER ─────────────────────────────────────── */}
-      <section style={{ background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '52px 0 64px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué se debería hacer?</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 32px' }}>
-            Cinco reformas para un sistema educativo de calidad.
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {[
-              { titulo: 'Pacto de Estado educativo a 20 años', detalle: 'España ha tenido 8 leyes educativas en 50 años. Cada gobierno reforma el sistema según su ideología y el siguiente lo deshace. Un pacto nacional que excluya la educación de la batalla política (como en Finlandia) es condición necesaria para cualquier mejora.', impacto: 'Estabilidad que permita evaluar y mejorar durante dos generaciones', color: '#ef4d68' },
-              { titulo: 'FP dual al estilo alemán', detalle: 'Solo el 22% estudia FP en España, frente al 60%+ de Alemania. El modelo dual (empresa + centro formativo) conecta la formación con las necesidades del mercado y reduce el paro juvenil. Hay que eliminar el estigma social de la FP y crear más plazas en ciclos con demanda.', impacto: 'Reducir el paro juvenil del 26% al 12–15% en 10 años', color: '#e67e22' },
-              { titulo: 'Carrera docente competitiva', detalle: 'Finlandia selecciona sus maestros entre el 10% mejor de los graduados universitarios. En España, el acceso a la función docente tiene poca selección de calidad. Una oposición que evalúe la aptitud pedagógica y un sistema de incentivos por resultados elevaría el nivel.', impacto: 'PISA +15–20 puntos en un plazo de 10 años (evidencia de Finlandia, Corea)', color: '#2563eb' },
-              { titulo: 'Evaluación externa y publicación de resultados', detalle: 'España no tiene una evaluación externa estandarizada por centro escolar. Sin saber qué colegios tienen buenos resultados y por qué, no se puede mejorar. La transparencia (publicar resultados ajustados por contexto socioeconómico) permite identificar buenas prácticas y replicarlas.', impacto: 'Identificar y escalar las mejores prácticas pedagógicas', color: '#059669' },
-              { titulo: 'Refuerzo en primaria, no en bachillerato', detalle: 'España invierte más por alumno en universidad (9.100€) que en primaria (6.420€). La evidencia científica indica que el retorno económico de la inversión educativa es mayor en las edades tempranas. Subir el ratio de maestros en infantil y primaria reduce el abandono escolar posterior.', impacto: 'Reducir el abandono del 13,7% al objetivo UE del 9% para 2030', color: '#8e44ad' },
-            ].map(m => (
-              <div key={m.titulo} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.color}30`, borderRadius: 6, padding: '20px 18px', borderTop: `3px solid ${m.color}` }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#ededeb', marginBottom: 8, lineHeight: 1.35 }}>{m.titulo}</div>
-                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12 }}>{m.detalle}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: m.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'var(--font-mono), monospace' }}>→ {m.impacto}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

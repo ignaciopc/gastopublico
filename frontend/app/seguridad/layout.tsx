@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Seguridad en España – Criminalidad 2015–2023',
-    description: 'Ciberdelitos +328%, delitos sexuales +108%, infracciones totales en máximos. Datos reales del Ministerio del Interior.',
+    description: 'Ciberdelitos +328%, delitos sexuales +108%, infracciones totales en máximos. Datos oficiales del Ministerio del Interior.',
     images: ['/api/og?title=Seguridad%20en%20Espa%C3%B1a&sub=Evoluci%C3%B3n%20de%20la%20criminalidad%202015%E2%80%932023%20%C2%B7%20Datos%20Ministerio%20del%20Interior'],
   },
   alternates: { canonical: 'https://gastopublico.es/seguridad' },

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Deuda Pública de España – 1,6 Billones y 107% del PIB · Datos Oficiales',
-    description: '1,6 billones de euros de deuda, 37.500 M€ en intereses/año, 34.000 € por habitante. Datos reales del Banco de España y Eurostat.',
+    description: '1,6 billones de euros de deuda, 37.500 M€ en intereses/año, 34.000 € por habitante. Datos oficiales del Banco de España y Eurostat.',
     url: 'https://gastopublico.es/deuda',
     images: [{ url: '/api/og?title=Deuda%20P%C3%BAblica%20de%20Espa%C3%B1a&sub=1%2C6%20billones%20%C2%B7%20107%25%20del%20PIB%20%C2%B7%20Datos%20Banco%20de%20Espa%C3%B1a', width: 1200, height: 630 }],
   },

@@ -1,5 +1,5 @@
-import SinPresupuestoCounter from '@/components/ui/SinPresupuestoCounter';
-import YearsWithoutBudget from '@/components/ui/YearsWithoutBudget';
+import ProrrogaCounter from '@/components/ui/ProrrogaCounter';
+import EjerciciosProrrogados from '@/components/ui/EjerciciosProrrogados';
 import FondosUECountdown from '@/components/ui/FondosUECountdown';
 import { formatEUR } from '@/lib/formatters';
 
@@ -10,11 +10,11 @@ const MINISTERIOS = [
   { gobierno: 'Aznar II (2000)', n: 16 },
   { gobierno: 'Zapatero I (2004)', n: 16 },
   { gobierno: 'Zapatero II (2008)', n: 17 },
-  { gobierno: 'Rajoy I (2011)', n: 13, nota: 'Ajuste 2011 (mín. histórico)' },
+  { gobierno: 'Rajoy I (2011)', n: 13, nota: 'Mínimo de la serie' },
   { gobierno: 'Rajoy II (2016)', n: 13 },
   { gobierno: 'Sánchez I (2018)', n: 17 },
-  { gobierno: 'Sánchez II (2020)', n: 22, nota: 'Récord histórico' },
-  { gobierno: 'Sánchez III (2024)', n: 22, nota: 'Récord histórico' },
+  { gobierno: 'Sánchez II (2020)', n: 22, nota: 'Máximo de la serie' },
+  { gobierno: 'Sánchez III (2024)', n: 22, nota: 'Máximo de la serie' },
 ];
 
 const ASESORES = [
@@ -67,13 +67,12 @@ const DEFICIT = [
 ];
 
 const COMPARATIVA = [
-  { metric: 'Deuda / PIB', esp: '108,1%', eu: '82,7%', de: '62,7%', fr: '110,6%', bad: true },
-  { metric: 'Déficit público', esp: '-3,1%', eu: '-2,9%', de: '+0,1%', fr: '-5,5%', bad: true },
-  { metric: 'Tasa de paro', esp: '11,2%', eu: '5,9%', de: '3,4%', fr: '7,3%', bad: true },
-  { metric: 'Presión fiscal (% PIB)', esp: '38,8%', eu: '41,2%', de: '45,3%', fr: '47,8%', bad: false },
-  { metric: 'Nº de ministerios', esp: '22', eu: '14', de: '14', fr: '15', bad: true },
-  { metric: 'Empleados públicos / 1.000 hab.', esp: '72', eu: '64', de: '59', fr: '88', bad: false },
-  { metric: 'Años sin presupuesto propio', esp: '7', eu: '0,4', de: '0', fr: '0', bad: true },
+  { metric: 'Deuda / PIB', esp: '108,1%', eu: '82,7%', de: '62,7%', fr: '110,6%', fuente: 'Eurostat · 2024' },
+  { metric: 'Déficit público', esp: '-3,1%', eu: '-2,9%', de: '+0,1%', fr: '-5,5%', fuente: 'Eurostat · 2024' },
+  { metric: 'Tasa de paro', esp: '11,2%', eu: '5,9%', de: '3,4%', fr: '7,3%', fuente: 'Eurostat · T4 2024' },
+  { metric: 'Presión fiscal (% PIB)', esp: '38,8%', eu: '41,2%', de: '45,3%', fr: '47,8%', fuente: 'Eurostat · 2023' },
+  { metric: 'Nº de ministerios', esp: '22', eu: '14', de: '14', fr: '15', fuente: 'Organigramas oficiales · 2024' },
+  { metric: 'Empleados públicos / 1.000 hab.', esp: '72', eu: '64', de: '59', fr: '88', fuente: 'OCDE · 2023' },
 ];
 
 const EMPRESAS_PUBLICAS = [
@@ -112,29 +111,30 @@ export default function GobiernoPage() {
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section style={{ background: '#0a0a0d', color: '#ededeb', padding: '56px 0 48px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div className="eyebrow" style={{ color: '#ef4d68', marginBottom: 10, fontSize: 11, letterSpacing: '0.18em' }}>TRANSPARENCIA POLÍTICA</div>
+          <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 10, fontSize: 11, letterSpacing: '0.18em' }}>ESTRUCTURA Y COSTE DE LA ADMINISTRACIÓN</div>
           <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 64px)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.05, margin: '0 0 18px', maxWidth: 900, color: '#ededeb' }}>
-            El coste real del Gobierno.<br />
-            <span style={{ color: '#ef4d68' }}>Con datos. Sin filtros.</span>
+            El coste del Gobierno,<br />
+            <span style={{ color: '#ef4d68' }}>partida a partida.</span>
           </h1>
           <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(255,255,255,0.55)', maxWidth: 680, margin: '0 0 40px' }}>
-            <YearsWithoutBudget /> años sin presupuesto propio, 22 ministerios récord, 740 asesores, 3,5 millones de empleados públicos
-            y 128.500 M€ en fondos europeos sin ejecutar. Todos los datos son oficiales y verificables.
+            Presupuesto prorrogado por <EjerciciosProrrogados />er ejercicio consecutivo, 22 ministerios,
+            740 puestos de personal eventual, 3,5 millones de empleados públicos y 128.500 M€ en fondos
+            europeos pendientes de ejecutar. Cada cifra enlaza a su fuente oficial.
           </p>
 
           {/* KPI strip */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 1, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
             {[
-              { label: 'Años sin PGE propio', value: null, sub: 'Récord democracia española' },
-              { label: 'Ministerios (récord)', value: '22', sub: 'Media UE: 14' },
-              { label: 'Asesores cargos confianza', value: '740', sub: '+30% desde 2018' },
+              { label: 'Ejercicios en prórroga', value: null, sub: 'Último PGE aprobado: 2023' },
+              { label: 'Ministerios', value: '22', sub: 'Media UE: 14' },
+              { label: 'Personal eventual', value: '740', sub: '+30% desde 2018' },
               { label: 'Empleados públicos', value: '3,51 M', sub: '+320.000 desde 2018' },
               { label: 'Fondos UE sin ejecutar', value: '128.500 M€', sub: 'Del total de 163.500 M€' },
             ].map((k, i, arr) => (
               <div key={k.label} style={{ padding: '20px 20px 16px', background: 'rgba(255,255,255,0.03)', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 0 }}>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 8 }}>{k.label}</div>
                 <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'var(--font-mono), monospace', letterSpacing: '-0.03em', color: '#ef4d68', lineHeight: 1 }}>
-                  {k.value === null ? <YearsWithoutBudget /> : k.value}
+                  {k.value === null ? <EjerciciosProrrogados /> : k.value}
                 </div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 6 }}>{k.sub}</div>
               </div>
@@ -148,37 +148,40 @@ export default function GobiernoPage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 56, alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 12 }}>Récord europeo</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 12 }}>Ejecución presupuestaria</div>
               <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 38px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 16px' }}>
-                <YearsWithoutBudget /> años sin aprobar<br />un presupuesto propio
+                España afronta {new Date().getFullYear()} con los presupuestos<br />de 2023 prorrogados por{' '}
+                <EjerciciosProrrogados />er año consecutivo
               </h2>
               <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,0.5)', margin: '0 0 20px' }}>
-                El último Presupuesto General del Estado aprobado por las Cortes fue la{' '}
-                <strong style={{ color: 'rgba(255,255,255,0.8)' }}>Ley 6/2018 de 3 de julio</strong>{' '}
-                (BOE núm. 161), bajo el gobierno de Mariano Rajoy. Desde entonces, Pedro Sánchez
-                ha gobernado con presupuestos prorrogados — el único presidente en la historia
-                de la democracia española en llevar este récord.
+                El último Presupuesto General del Estado aprobado por las Cortes fue el de 2023,{' '}
+                <strong style={{ color: 'rgba(255,255,255,0.8)' }}>Ley 31/2022, de 23 de diciembre</strong>.
+                Los ejercicios 2024, 2025 y 2026 se rigen por prórroga automática conforme al
+                art. 134.4 CE. En la última década, siete ejercicios han comenzado en situación de
+                prórroga: 2017, 2018, 2019, 2020, 2024, 2025 y 2026.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[
-                  'Ningún gobierno democrático europeo supera 3 años sin PGE',
-                  'Sin presupuesto propio no se puede planificar inversión a largo plazo',
-                  'La prórroga automática congela partidas sin adaptarlas a la inflación',
-                  'El Congreso pierde capacidad de control y enmienda del gasto',
+                  'El art. 134.4 CE prorroga automáticamente los presupuestos del ejercicio anterior si no se aprueban los nuevos antes del 1 de enero',
+                  'La prórroga mantiene los créditos iniciales del último presupuesto aprobado, sin actualizarlos por inflación',
+                  'Las modificaciones de crédito permiten ajustar partidas durante la prórroga, con autorización del Consejo de Ministros o de las Cortes según el importe',
                 ].map(item => (
                   <div key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.45 }}>
-                    <span style={{ color: '#ef4d68', fontWeight: 700, marginTop: 1, flexShrink: 0 }}>→</span>
+                    <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginTop: 1, flexShrink: 0 }}>→</span>
                     {item}
                   </div>
                 ))}
               </div>
+              <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.3)', margin: '16px 0 0', fontFamily: 'var(--font-mono), monospace' }}>
+                Fuente: BOE · Ministerio de Hacienda (SEPG)
+              </p>
             </div>
             <div>
-              <SinPresupuestoCounter />
-              <div style={{ marginTop: 28, padding: '16px 20px', border: '1px solid rgba(239,77,104,0.3)', borderRadius: 4, background: 'rgba(239,77,104,0.06)' }}>
-                <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Último PGE aprobado</div>
-                <div style={{ fontSize: 15, color: '#ededeb', fontWeight: 600 }}>Ley 6/2018 · 3 de julio de 2018</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Gobierno de Mariano Rajoy · PP</div>
+              <ProrrogaCounter />
+              <div style={{ marginTop: 28, padding: '16px 20px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, background: 'rgba(255,255,255,0.03)' }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Último PGE aprobado</div>
+                <div style={{ fontSize: 15, color: '#ededeb', fontWeight: 600 }}>Ejercicio 2023 · Ley 31/2022, de 23 de diciembre</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>BOE núm. 308, de 24 de diciembre de 2022</div>
               </div>
             </div>
           </div>
@@ -190,12 +193,13 @@ export default function GobiernoPage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 6 }}>Eurostat / AIReF · Datos reales</div>
+              <div className="eyebrow" style={{ marginBottom: 6 }}>Eurostat / AIReF · 2008–2024</div>
               <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-                17 años consecutivos en déficit
+                17 ejercicios consecutivos en déficit
               </h2>
               <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: 0 }}>
-                España no ha cerrado un ejercicio con superávit desde 2007. Ningún otro país del G7 tiene esta racha.
+                El último ejercicio que España cerró con superávit fue 2007 (+1,9% del PIB).
+                Déficit en porcentaje del PIB, metodología SEC 2010.
               </p>
             </div>
             <div style={{ textAlign: 'right' }}>
@@ -248,10 +252,11 @@ export default function GobiernoPage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Portal de Transparencia · Real Decreto de estructura</div>
           <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-            22 ministerios — récord histórico de la democracia
+            22 ministerios — la cifra más alta de la serie desde 1978
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: '0 0 28px' }}>
-            El Gobierno de Sánchez mantiene la estructura más grande desde 1978. La media de la UE es de 14 ministerios.
+            Número de departamentos ministeriales al inicio de cada legislatura, según el real decreto
+            de reestructuración de la Administración General del Estado. La media de la UE es de 14.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {MINISTERIOS.map(m => {
@@ -279,12 +284,14 @@ export default function GobiernoPage() {
             <div>
               <div className="eyebrow" style={{ marginBottom: 6 }}>Portal de Transparencia · BOEL</div>
               <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 10px', letterSpacing: '-0.02em' }}>
-                740 asesores y cargos de confianza
+                740 puestos de personal eventual
               </h2>
               <p style={{ fontSize: 14, color: 'var(--muted-strong)', lineHeight: 1.65, margin: '0 0 20px' }}>
-                Los cargos eventuales son nombrados a dedo por el Gobierno sin concurso público.
-                Su número ha crecido un <strong>30% desde 2018</strong> y un <strong>34% desde los mínimos de Rajoy</strong>.
-                El coste medio por asesor supera los 80.000 €/año en nómina bruta.
+                El personal eventual (art. 12 del Estatuto Básico del Empleado Público) desempeña
+                funciones de confianza o asesoramiento especial y se nombra y cesa libremente, sin
+                proceso selectivo. Su número ha crecido un <strong>30% desde 2018</strong> y un{' '}
+                <strong>35% desde el mínimo de la serie en 2015</strong>. El coste medio estimado por
+                puesto es de 80.000 €/año en nómina bruta.
               </p>
               <div style={{ padding: '16px 20px', border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)' }}>
                 <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>Coste estimado anual</div>
@@ -323,9 +330,10 @@ export default function GobiernoPage() {
             Publicidad institucional: 254 M€ en 2023
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: '0 0 24px', maxWidth: 700, lineHeight: 1.6 }}>
-            El Gobierno distribuye publicidad oficial entre medios de comunicación. Los criterios de reparto
-            no son transparentes y los medios críticos históricamente reciben menos. En 2023 se alcanzó el
-            segundo máximo histórico de la serie.
+            Gasto de la Administración General del Estado en campañas de publicidad y comunicación
+            institucional, reguladas por la Ley 29/2005. El Plan Anual de Publicidad y Comunicación
+            se aprueba en Consejo de Ministros y su ejecución se publica en un informe anual.
+            2023 es el valor más alto de la serie 2018–2023.
           </p>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', height: 160, borderBottom: '1px solid var(--rule)', paddingBottom: 8 }}>
             {PUBLICIDAD.map(p => {
@@ -354,7 +362,7 @@ export default function GobiernoPage() {
             <div>
               <div className="eyebrow" style={{ marginBottom: 6 }}>Boletín Estadístico · Ministerio de Hacienda (BOEL)</div>
               <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-                3,51 millones de empleados públicos — nuevo récord
+                3,51 millones de empleados públicos — máximo de la serie
               </h2>
               <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: 0 }}>
                 +320.000 empleados desde 2018 y +650.000 desde los mínimos de la crisis. Coste salarial total: 130.000 M€/año.
@@ -392,9 +400,9 @@ export default function GobiernoPage() {
             Next Generation EU: solo el 21% ejecutado
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: '0 0 28px', maxWidth: 720, lineHeight: 1.6 }}>
-            España recibió la mayor asignación de fondos europeos post-COVID de la UE. A finales de 2024,
-            con el plazo expirando en 2026, menos de la cuarta parte ha llegado a proyectos reales.
-            España es el país con peor tasa de ejecución del G7.
+            España tiene asignados 163.500 M€ del Mecanismo de Recuperación y Resiliencia para el
+            período 2021–2026, la segunda mayor dotación de la UE en términos absolutos tras Italia.
+            A cierre de 2024, el 21,4% se había ejecutado en proyectos.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.4fr) minmax(0,1fr)', gap: 32, marginBottom: 28, alignItems: 'start' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
@@ -434,8 +442,9 @@ export default function GobiernoPage() {
             199 M€ al año para 615 parlamentarios
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: '0 0 24px', maxWidth: 720 }}>
-            España tiene bicameralismo pleno con dos cámaras. El Senado, con escasa capacidad real de bloqueo legislativo,
-            cuesta 75 M€/año. El coste por escaño supera los 323.000 €/año.
+            España tiene un sistema bicameral. El Senado, cámara de segunda lectura conforme al
+            art. 90 CE, tiene un presupuesto de 75 M€/año. El coste medio por escaño de las Cortes
+            Generales es de 323.000 €/año.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             {[
@@ -518,31 +527,36 @@ export default function GobiernoPage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Eurostat · OCDE · Comisión Europea · 2024</div>
           <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 10px', letterSpacing: '-0.02em' }}>
-            España vs Europa: los datos que no salen en los mítines
+            España en el contexto europeo
           </h2>
-          <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: '0 0 24px', maxWidth: 720 }}>
-            Comparativa de indicadores clave de gobernanza y economía pública. España destaca negativamente
-            en deuda, paro, ministerios y años sin presupuesto propio.
+          <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: '0 0 24px', maxWidth: 860 }}>
+            Indicadores de gobernanza y economía pública. Alemania y Francia son las dos mayores economías
+            de la eurozona por PIB y, como España, están sujetas a las reglas fiscales del Pacto de
+            Estabilidad y Crecimiento, por lo que sus cifras de deuda y déficit se calculan con la misma
+            metodología (SEC 2010). La media UE agrega los 27 Estados miembros. La selección de
+            comparadores condiciona la lectura: la serie completa está disponible en Eurostat.
           </p>
           <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'var(--background)' }}>
                   <th style={th}>Indicador</th>
-                  <th style={{ ...th, textAlign: 'center', color: 'var(--bad)' }}>🇪🇸 España</th>
+                  <th style={{ ...th, textAlign: 'center' }}>🇪🇸 España</th>
                   <th style={{ ...th, textAlign: 'center' }}>Media UE</th>
                   <th style={{ ...th, textAlign: 'center' }}>🇩🇪 Alemania</th>
                   <th style={{ ...th, textAlign: 'center' }}>🇫🇷 Francia</th>
+                  <th style={th}>Fuente · año</th>
                 </tr>
               </thead>
               <tbody>
                 {COMPARATIVA.map((row, i) => (
                   <tr key={row.metric} style={{ background: i % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
                     <td style={{ ...td, fontWeight: 600 }}>{row.metric}</td>
-                    <td style={{ ...td, textAlign: 'center', fontFamily: 'var(--font-mono), monospace', fontWeight: 700, color: row.bad ? 'var(--bad)' : 'var(--good)' }}>{row.esp}</td>
+                    <td style={{ ...td, textAlign: 'center', fontFamily: 'var(--font-mono), monospace', fontWeight: 700 }}>{row.esp}</td>
                     <td style={{ ...td, textAlign: 'center', fontFamily: 'var(--font-mono), monospace', color: 'var(--muted-strong)' }}>{row.eu}</td>
                     <td style={{ ...td, textAlign: 'center', fontFamily: 'var(--font-mono), monospace', color: 'var(--muted-strong)' }}>{row.de}</td>
                     <td style={{ ...td, textAlign: 'center', fontFamily: 'var(--font-mono), monospace', color: 'var(--muted-strong)' }}>{row.fr}</td>
+                    <td style={{ ...td, fontSize: 11.5, fontFamily: 'var(--font-mono), monospace', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{row.fuente}</td>
                   </tr>
                 ))}
               </tbody>
@@ -551,152 +565,6 @@ export default function GobiernoPage() {
           <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 14, lineHeight: 1.5 }}>
             Fuentes: Eurostat (deuda, déficit, presión fiscal), OIT/Eurostat (paro), OCDE (empleados públicos),
             datos oficiales de cada gobierno (ministerios). Datos 2024 o último disponible.
-          </p>
-        </div>
-      </section>
-
-      {/* ── 11. PROPUESTAS Y SOLUCIONES ──────────────────────────────────── */}
-      <section style={{ padding: '56px 0 72px', background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ marginBottom: 36 }}>
-            <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>
-              ¿Qué se debería hacer?
-            </div>
-            <h2 style={{ fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 900, color: '#ededeb', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 14px' }}>
-              10 medidas concretas con impacto demostrado.
-            </h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', maxWidth: 680, lineHeight: 1.65, margin: 0 }}>
-              No son opiniones. Son políticas públicas que funcionan en los países que mejor gestionan sus finanzas —
-              Alemania, Países Bajos, Suecia — con el ahorro o ingreso estimado para España.
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 1, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, overflow: 'hidden' }}>
-            {[
-              {
-                n: '01',
-                titulo: 'Aprobar un Presupuesto General del Estado',
-                impacto: 'Ahorro ~8.000 M€/año',
-                detalle: 'La prórroga automática congela partidas a precios de 2018, impide reasignar gasto a prioridades reales y bloquea la inversión pública planificada. Sin PGE no hay política fiscal, solo gestoría.',
-                como: 'Negociar acuerdos sectoriales con los grupos de apoyo parlamentario, desvinculando el presupuesto de la aritmética de investidura.',
-                color: '#ef4d68',
-              },
-              {
-                n: '02',
-                titulo: 'Reducir el número de ministerios a 14–16',
-                impacto: 'Ahorro ~400–600 M€/año',
-                detalle: '22 ministerios generan duplicidades, conflictos de competencias y una estructura de altos cargos, asesores y gabinetes desproporcionada. La media de la UE es 14. Rajoy gobernó con 13.',
-                como: 'Fusionar carteras con solapamientos evidentes: Transición Ecológica + Agricultura, Asuntos Exteriores + Cooperación, Igualdad (reintegrar en Presidencia).',
-                color: '#e67e22',
-              },
-              {
-                n: '03',
-                titulo: 'Ejecutar los fondos Next Generation EU antes del plazo',
-                impacto: 'Evitar perder hasta 20.000 M€',
-                detalle: 'Con solo el 21% ejecutado y el plazo en agosto de 2026, España necesita multiplicar por 4 el ritmo de ejecución. Los PERTE están atascados en burocracia y convocatorias desiertas.',
-                como: 'Centralizar la gestión en una agencia única, simplificar las convocatorias y eliminar los requisitos de cofinanciación que bloquean a PYMES y CCAA con menos recursos.',
-                color: '#2563eb',
-              },
-              {
-                n: '04',
-                titulo: 'Reforma real del sistema de pensiones',
-                impacto: 'Sostenibilidad 2,54 → 4,0 cotizantes/pensionista',
-                detalle: 'La AIReF proyecta el gasto en pensiones al 16,8% del PIB en 2050. El fondo de reserva tiene para menos de 10 días. Sin una reforma que combme incentivos a trabajar más años con ahorro privado complementario, el sistema es insolvente.',
-                como: 'Ampliar el período de cómputo a 35 años, introducir incentivos fiscales reales al ahorro privado y separar las prestaciones no contributivas del sistema contributivo.',
-                color: '#8e44ad',
-              },
-              {
-                n: '05',
-                titulo: 'Reducir la deuda al 60% del PIB en 15 años',
-                impacto: 'Ahorro ~15.000 M€/año en intereses',
-                detalle: 'Con la deuda al 108% del PIB, cada subida de 1 punto en los tipos de interés cuesta ~16.000 M€/año adicionales. El margen para estabilizadores automáticos en una crisis es mínimo.',
-                como: 'Establecer por ley una regla de gasto que condicione el crecimiento del gasto primario al crecimiento potencial del PIB, con supervisión vinculante de la AIReF.',
-                color: '#e74c3c',
-              },
-              {
-                n: '06',
-                titulo: 'Liberalizar el suelo y la normativa urbanística',
-                impacto: 'Reducir precio vivienda un 20–30%',
-                detalle: 'España tiene suelo de sobra. El problema es regulatorio: clasificación, planeamiento urbanístico fragmentado en 8.131 municipios y recursos judiciales que paralizan promociones durante años.',
-                como: 'Reformar la Ley del Suelo para que el suelo urbanizable sea la regla y el no urbanizable la excepción. Unificar planeamientos a nivel de área metropolitana.',
-                color: '#059669',
-              },
-              {
-                n: '07',
-                titulo: 'Reducir la presión regulatoria sobre las empresas',
-                impacto: 'Ganar 2–3 puntos de PIB en productividad',
-                detalle: 'España tiene una de las tasas de paro estructural más altas de la OCDE. Parte se explica por los costes de despido, la dualidad del mercado laboral y la incertidumbre regulatoria que desincentiva la contratación indefinida.',
-                como: 'Unificar el contrato laboral con indemnización creciente por años (modelo austriaco), eliminar las cláusulas de ultraactividad de los convenios y digitalizar los trámites de apertura de empresa.',
-                color: '#0891b2',
-              },
-              {
-                n: '08',
-                titulo: 'Digitalizar la Administración Pública y reducir burocracia',
-                impacto: 'Ahorro ~6.000 M€/año + reducción de tiempos',
-                detalle: 'España aprobó la Ley 39/2015 de Procedimiento Administrativo hace casi 10 años. En 2024, más del 60% de los trámites con la AAPP siguen requiriendo presencia física o documentos en papel.',
-                como: 'Implantar un expediente único digital interoperable entre todas las AAPP, eliminar certificados entre organismos públicos y fijar plazos máximos de resolución con silencio administrativo positivo.',
-                color: '#7c3aed',
-              },
-              {
-                n: '09',
-                titulo: 'Transparencia real en publicidad institucional',
-                impacto: 'Confianza democrática + 254 M€ asignados con criterios objetivos',
-                detalle: 'El Gobierno distribuye 254 M€ anuales en publicidad sin criterios públicos ni auditables. Los medios que no informan favorablemente del Gobierno históricamente reciben menos. Esto distorsiona el mercado y la independencia editorial.',
-                como: 'Publicar en tiempo real cada euro de publicidad institucional con el medio receptor, la campaña y el criterio de asignación. Someter la distribución a auditoría externa independiente.',
-                color: '#d97706',
-              },
-              {
-                n: '10',
-                titulo: 'Reestructurar las empresas públicas deficitarias',
-                impacto: 'Reducir inyecciones de capital en ~2.800 M€/año',
-                detalle: 'RENFE, ADIF, Correos, RTVE y Paradores reciben inyecciones recurrentes que suman miles de millones. Ninguna tiene un plan creíble de retorno al equilibrio. El contribuyente financia estructuras que el mercado ya no sostiene.',
-                como: 'Exigir planes de viabilidad vinculantes con horizonte de 5 años o conversión en servicios mínimos garantizados. Separar contabilidad comercial y obligaciones de servicio público.',
-                color: '#dc2626',
-              },
-            ].map((p, i, arr) => (
-              <div key={p.n} style={{
-                padding: '28px 26px',
-                background: 'rgba(255,255,255,0.02)',
-                borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 0,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 14 }}>
-                  <span style={{
-                    fontFamily: 'var(--font-mono), monospace',
-                    fontSize: 11, fontWeight: 800, color: p.color,
-                    letterSpacing: '0.06em', flexShrink: 0, marginTop: 2,
-                  }}>{p.n}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: '#ededeb', letterSpacing: '-0.01em', lineHeight: 1.3, marginBottom: 6 }}>
-                      {p.titulo}
-                    </div>
-                    <div style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
-                      textTransform: 'uppercase', padding: '3px 8px', borderRadius: 2,
-                      border: `1px solid ${p.color}40`, color: p.color,
-                      background: `${p.color}10`,
-                      fontFamily: 'var(--font-mono), monospace',
-                    }}>
-                      {p.impacto}
-                    </div>
-                  </div>
-                </div>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, margin: '0 0 10px' }}>
-                  {p.detalle}
-                </p>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: p.color, flexShrink: 0, marginTop: 1 }}>→</span>
-                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>
-                    <strong style={{ color: 'rgba(255,255,255,0.75)' }}>Cómo: </strong>{p.como}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 20, lineHeight: 1.6 }}>
-            Las estimaciones de ahorro se basan en estudios de la AIReF, Banco de España, Comisión Europea y organismos equivalentes en países de referencia.
-            No constituyen una valoración política sino un ejercicio técnico de impacto presupuestario.
           </p>
         </div>
       </section>

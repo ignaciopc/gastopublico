@@ -429,31 +429,6 @@ export default function ParoPage() {
         SEPE — Estadísticas del paro registrado
       </div>
       </div>{/* cierre del wrapper max-width */}
-
-      {/* ── QUÉ SE DEBERÍA HACER ─────────────────────────────────────── */}
-      <section style={{ background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '52px 0 64px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué se debería hacer?</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 32px' }}>
-            Cinco reformas para bajar el paro estructural.
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {[
-              { titulo: 'Contrato único con indemnización creciente', detalle: 'El modelo de dos velocidades (indefinido vs. temporal) ha generado décadas de rotación masiva. Un contrato único con indemnización creciente por años cotizados (modelo austriaco) elimina el incentivo a despedir para recontratar temporal.', impacto: 'Reducir la tasa de temporalidad estructural al 12–15% (desde 28%)', color: '#ef4d68' },
-              { titulo: 'Reforma del sistema de formación profesional', detalle: 'España tiene una tasa de abandono escolar del 14% y un sistema de FP desconectado de las necesidades del mercado. El modelo alemán de FP dual (empresa + centro formativo) reduce el paro juvenil a menos del 6%.', impacto: 'Paro juvenil del 26% podría bajar al 12–15% en 10 años', color: '#e67e22' },
-              { titulo: 'Reducir el coste de la regulación laboral', detalle: 'Las empresas pequeñas evitan crecer por encima de los umbrales de regulación (25, 50 empleados) donde entran en juego comités de empresa, EREs y mayores costes de compliance. Neutralizar estos "escalones" regulatorios incentivaría la creación de empleo.', impacto: '+100.000–200.000 empleos estimados en PYMES', color: '#2563eb' },
-              { titulo: 'Invertir en I+D+i para crear empleos de calidad', detalle: 'España gasta el 1,44% del PIB en I+D (media UE: 2,3%). Los países con menor paro estructural tienen economías de mayor valor añadido que crean empleos resistentes a los ciclos. La fuga de cerebros es el síntoma, no la causa.', impacto: 'Alcanzar el 2% del PIB en I+D generaría ~120.000 empleos directos', color: '#059669' },
-              { titulo: 'Liberalizar sectores protegidos de la competencia', detalle: 'Taxis, farmacias, notarías, colegios profesionales y muchos servicios regulados tienen barreras de entrada que reducen empleo y suben precios. La CNMC ha identificado restricciones que frenan la creación de decenas de miles de puestos de trabajo.', impacto: '+0,8–1,2 pp de PIB y empleo en servicios liberalizados', color: '#8e44ad' },
-            ].map(m => (
-              <div key={m.titulo} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.color}30`, borderRadius: 6, padding: '20px 18px', borderTop: `3px solid ${m.color}` }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#ededeb', marginBottom: 8, lineHeight: 1.35 }}>{m.titulo}</div>
-                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12 }}>{m.detalle}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: m.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'var(--font-mono), monospace' }}>→ {m.impacto}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

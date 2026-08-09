@@ -16,14 +16,14 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Paro en España – Desempleo 2015–2024 · Datos EPA',
-    description: 'España lidera el paro en la UE con 11,2%. Paro juvenil 27%, brecha de 15 puntos entre CCAA. Datos reales de la Encuesta de Población Activa.',
+    description: 'España lidera el paro en la UE con 11,2%. Paro juvenil 27%, brecha de 15 puntos entre CCAA. Datos oficiales de la Encuesta de Población Activa.',
     url: 'https://gastopublico.es/paro',
     images: [{ url: '/api/og?title=Paro%20en%20Espa%C3%B1a&sub=Desempleo%20y%20mercado%20laboral%202015%E2%80%932024%20%C2%B7%20Datos%20EPA', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Paro en España – Desempleo 2015–2024',
-    description: 'Mayor tasa de paro de la UE, paro juvenil 27%, brecha enorme entre CCAA. Datos EPA oficiales.',
+    description: 'Mayor tasa de paro de la UE, paro juvenil 27%, brecha de 15 puntos entre CCAA. Datos EPA oficiales.',
     images: ['/api/og?title=Paro%20en%20Espa%C3%B1a&sub=Desempleo%20y%20mercado%20laboral%202015%E2%80%932024%20%C2%B7%20Datos%20EPA'],
   },
   alternates: { canonical: 'https://gastopublico.es/paro' },

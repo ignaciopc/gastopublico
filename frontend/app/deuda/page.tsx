@@ -299,31 +299,6 @@ export default function DeudaPage() {
         AIReF — Informe sobre sostenibilidad fiscal a largo plazo
       </div>
       </div>{/* cierre del wrapper max-width */}
-
-      {/* ── QUÉ SE DEBERÍA HACER ─────────────────────────────────────── */}
-      <section style={{ background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '52px 0 64px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué se debería hacer?</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 32px' }}>
-            Cinco medidas para frenar el crecimiento de la deuda.
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {[
-              { titulo: 'Regla de gasto con supervisión independiente', detalle: 'Vincular por ley el crecimiento del gasto primario al crecimiento potencial del PIB. La AIReF ya tiene el mandato técnico; necesita poder vinculante, no solo recomendaciones.', impacto: 'Reducción déficit estructural ~1,5 pp PIB/año', color: '#ef4d68' },
-              { titulo: 'Superávit primario hasta bajar al 90% del PIB', detalle: 'Con crecimientos del PIB del 2–2,5% y tipos al 3–4%, la deuda no baja sola. Hace falta generar excedente antes del pago de intereses para que el ratio converja hacia el 60% de Maastricht.', impacto: 'Ahorro ~15.000 M€/año en intereses a 15 años', color: '#e67e22' },
-              { titulo: 'Privatizar activos públicos no estratégicos', detalle: 'El Estado tiene participaciones en más de 300 empresas. Muchas no justifican la presencia pública. La venta ordenada de activos financiaría amortización anticipada de deuda cara.', impacto: 'Desinversión potencial de 30.000–50.000 M€', color: '#2563eb' },
-              { titulo: 'Reformar la Ley de Estabilidad Presupuestaria', detalle: 'La Ley Orgánica 2/2012 fija los objetivos de déficit pero no tiene mecanismos automáticos de corrección cuando se incumplen. Los procedimientos de sanción son lentos e ineficaces.', impacto: 'Credibilidad fiscal ante mercados internacionales', color: '#059669' },
-              { titulo: 'Reducir gasto corriente sin cortar inversión', detalle: 'El gasto en pensiones, funcionarios y subsidios supone el 82% del presupuesto. Cualquier ajuste sostenible pasa por aquí, no por recortar inversión en infraestructuras o I+D que tiene multiplicadores positivos.', impacto: 'Margen fiscal de 15.000–20.000 M€ sin destruir capital', color: '#8e44ad' },
-            ].map(m => (
-              <div key={m.titulo} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.color}30`, borderRadius: 6, padding: '20px 18px', borderTop: `3px solid ${m.color}` }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#ededeb', marginBottom: 8, lineHeight: 1.35 }}>{m.titulo}</div>
-                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12 }}>{m.detalle}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: m.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'var(--font-mono), monospace' }}>→ {m.impacto}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

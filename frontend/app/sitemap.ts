@@ -20,5 +20,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/educacion`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${base}/alertas`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/impuestometro`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/inmigracion`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${base}/politicos`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${base}/metodologia`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ];
 }

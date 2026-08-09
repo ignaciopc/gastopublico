@@ -349,31 +349,6 @@ export default function ViviendaPage() {
           <strong>Fuentes:</strong> Ministerio de Transportes · INE — Estadística de Ejecuciones Hipotecarias · Fotocasa Research / Idealista Data · Banco de España
         </div>
       </div>
-
-      {/* QUÉ SE DEBERÍA HACER */}
-      <section style={{ background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '52px 0 64px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué se debería hacer?</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 32px' }}>
-            Cinco medidas para que la vivienda sea asequible.
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {[
-              { titulo: 'Movilizar suelo público para VPO', detalle: 'España tiene decenas de miles de hectáreas de suelo público sin edificar. Cederlo a promotoras bajo la condición de construir VPO con alquiler asequible durante 50 años aumentaría el parque sin coste presupuestario directo.', impacto: 'Potencial de 200.000–300.000 VPOs en 10 años', color: '#ef4d68' },
-              { titulo: 'Reforma fiscal: gravar pisos vacíos', detalle: 'España tiene ~3,8 millones de viviendas vacías según el Censo. Un impuesto progresivo sobre vivienda vacía (como en Francia o Reino Unido) incentivaría sacar al mercado un parque enorme ya construido.', impacto: 'Hasta 500.000 nuevas viviendas en alquiler sin construir nada', color: '#e67e22' },
-              { titulo: 'Regular el alquiler turístico', detalle: 'Las plataformas de alquiler vacacional (Airbnb, Booking) han sacado ~340.000 viviendas del mercado residencial en las principales ciudades. Una regulación clara con licencias limitadas y revocables reduciría la presión en zonas tensionadas.', impacto: 'Recuperar 100.000–150.000 viviendas para residentes', color: '#2563eb' },
-              { titulo: 'Agilizar licencias de construcción', detalle: 'Obtener una licencia de obra nueva en España tarda de media 18 meses. En Alemania: 3 meses. La burocracia municipal es uno de los principales frenos a la construcción de nueva oferta. Una ventanilla única digital reduciría tiempos y costes.', impacto: '+30.000–50.000 viviendas nuevas/año si se reduce a 6 meses', color: '#8e44ad' },
-              { titulo: 'Ampliar el parque público de alquiler social', detalle: 'España tiene 290.000 viviendas de alquiler social (2,5% del parque). Francia tiene 5,3 millones (17%), Países Bajos 2,3 millones (30%). Sin inversión directa del Estado no hay solución estructural para los hogares de menor renta.', impacto: 'Triplicar el parque público requiere ~30.000 M€ en 10 años', color: '#059669' },
-            ].map(m => (
-              <div key={m.titulo} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.color}30`, borderRadius: 6, padding: '20px 18px', borderTop: `3px solid ${m.color}` }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#ededeb', marginBottom: 8, lineHeight: 1.35 }}>{m.titulo}</div>
-                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12 }}>{m.detalle}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: m.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'var(--font-mono), monospace' }}>→ {m.impacto}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'GastoPublico.es – Transparencia del Gasto Público Español',
-    description: '18.490 € por segundo. Datos reales del presupuesto, contratos y subvenciones del Estado español.',
+    description: '18.490 € por segundo. Datos oficiales del presupuesto, contratos y subvenciones del Estado español.',
     site: '@GastoPublicoES',
     images: [OG_DEFAULT],
   },

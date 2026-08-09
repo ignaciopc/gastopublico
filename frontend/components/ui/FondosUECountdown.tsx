@@ -103,8 +103,9 @@ export default function FondosUECountdown() {
         fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5,
         borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 10,
       }}>
-        Los fondos no ejecutados antes del plazo deberán ser devueltos a la UE.
-        España es el país con <strong style={{ color: 'rgba(255,255,255,0.65)' }}>peor tasa de ejecución del G7</strong> (21,4%).
+        El Reglamento (UE) 2021/241 fija el 31 de agosto de 2026 como fecha límite de ejecución
+        y no contempla prórroga. Tasa de ejecución de España a cierre de 2024:{' '}
+        <strong style={{ color: 'rgba(255,255,255,0.65)' }}>21,4%</strong>.
       </div>
     </div>
   );

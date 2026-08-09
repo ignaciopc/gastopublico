@@ -1,30 +1,29 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Sueldos y Cargos de los Políticos – Datos Oficiales 2024',
+  title: 'Retribuciones de altos cargos – Datos oficiales 2024',
   description:
-    'Retribuciones del presidente, vicepresidentes, ministros y altos cargos del Gobierno de España. 740 asesores nombrados a dedo, coches oficiales, viajes y pensiones vitalicias. Datos del BOE y Portal de Transparencia 2024.',
+    'Retribuciones del presidente, vicepresidentes, ministros y altos cargos del Gobierno de España. 740 puestos de personal eventual, parque móvil oficial y pensiones de ex-presidentes. Datos del BOE y Portal de Transparencia 2024.',
   keywords: [
-    'sueldo presidente gobierno España',
+    'retribución presidente del gobierno España',
     'retribuciones ministros 2024',
-    'asesores gobierno España',
-    'altos cargos sueldo BOE',
-    'coches oficiales gobierno',
+    'personal eventual administración España',
+    'altos cargos retribuciones BOE',
+    'parque móvil del Estado',
     'pensiones expresidentes',
-    'coste político España',
     'portal transparencia retribuciones',
   ],
   openGraph: {
-    title: 'Sueldos y Cargos de los Políticos Españoles – 2024',
-    description: '96.179€ el presidente. 740 asesores. 678 M€ coste total. Coches, viajes y pensiones vitalicias. Todo en el BOE.',
+    title: 'Retribuciones de altos cargos del Gobierno de España – 2024',
+    description: '96.179 € el presidente. 740 puestos de personal eventual. 678 M€ de coste total. Retribuciones fijadas por real decreto y publicadas en el BOE.',
     url: 'https://gastopublico.es/politicos',
-    images: [{ url: '/api/og?title=Pol%C3%ADticos%20y%20Cargos&sub=Sueldos%2C%20asesores%2C%20coches%20y%20pensiones%20%C2%B7%20Datos%20BOE%202024', width: 1200, height: 630 }],
+    images: [{ url: '/api/og?title=Retribuciones%20de%20altos%20cargos&sub=Retribuciones%2C%20personal%20eventual%20y%20parque%20m%C3%B3vil%20%C2%B7%20BOE%202024', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sueldos y Cargos de los Políticos – 2024',
-    description: '96.179€ el presidente. 740 asesores. 678 M€. Todo lo que cuesta el Gobierno de España.',
-    images: ['/api/og?title=Pol%C3%ADticos%20y%20Cargos&sub=Sueldos%2C%20asesores%2C%20coches%20y%20pensiones%20%C2%B7%20Datos%20BOE%202024'],
+    title: 'Retribuciones de altos cargos – 2024',
+    description: '96.179 € el presidente. 740 puestos de personal eventual. 678 M€ de coste total. Datos del BOE.',
+    images: ['/api/og?title=Retribuciones%20de%20altos%20cargos&sub=Retribuciones%2C%20personal%20eventual%20y%20parque%20m%C3%B3vil%20%C2%B7%20BOE%202024'],
   },
   alternates: { canonical: 'https://gastopublico.es/politicos' },
 };

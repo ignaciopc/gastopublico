@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Pensiones en España – Gasto y Sostenibilidad · Datos Oficiales',
-    description: '181.000 M€ en pensiones (12,4% PIB), 10,8 millones de pensionistas, 2,5 cotizantes por pensionista. Datos reales de la Seguridad Social.',
+    description: '181.000 M€ en pensiones (12,4% PIB), 10,8 millones de pensionistas, 2,5 cotizantes por pensionista. Datos oficiales de la Seguridad Social.',
     url: 'https://gastopublico.es/pensiones',
     images: [{ url: '/api/og?title=Pensiones%20en%20Espa%C3%B1a&sub=Gasto%2C%20sostenibilidad%20y%20proyecciones%202024%20%C2%B7%20Seguridad%20Social', width: 1200, height: 630 }],
   },

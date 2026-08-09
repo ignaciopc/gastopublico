@@ -165,7 +165,7 @@ export default function SubvencionesPage() {
       <PageHeader
         eyebrow="Subvenciones · Base de Datos Nacional"
         title={`47.840 millones repartidos. El ${pctTop100} va a 100 perceptores.`}
-        lede="La BDNS publica todas las subvenciones concedidas por las administraciones públicas. Las hemos cruzado, agregado y ordenado para que veas, sin filtros, quién recibe el dinero público y por qué concepto."
+        lede="La BDNS publica todas las subvenciones concedidas por las administraciones públicas. Aquí se muestran agregadas y ordenadas por importe, con el beneficiario, el órgano concedente y el concepto de cada concesión."
         meta={[
           { k: 'Fuente', v: 'BDNS · Base de Datos Nacional de Subvenciones' },
           { k: 'Cobertura', v: 'Estado · CCAA · EELL' },

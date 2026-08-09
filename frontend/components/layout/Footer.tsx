@@ -11,8 +11,9 @@ const COLS = [
     { l: 'Alertas', href: '/alertas' },
   ]},
   { h: 'Metodología', links: [
-    { l: 'Cómo trabajamos', href: '/datasets' },
-    { l: 'Fuentes', href: '/datasets' },
+    { l: 'Cómo trabajamos', href: '/metodologia' },
+    { l: 'Fuentes y actualización', href: '/metodologia' },
+    { l: 'Criterios de agregación', href: '/metodologia' },
     { l: 'API pública', href: '/datasets' },
     { l: 'Licencia CC-BY 4.0', href: '/datasets' },
   ]},
@@ -62,9 +63,14 @@ export default function Footer() {
                   GastoPúblico<span style={{ color: 'var(--muted)' }}>.es</span>
                 </span>
               </div>
-              <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-strong)', margin: '0 0 12px', maxWidth: 380 }}>
+              <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-strong)', margin: '0 0 10px', maxWidth: 380 }}>
                 Periodismo de datos sobre el gasto público español. Sin filiación política.
                 Sin publicidad. Sin patrocinios institucionales. Datos abiertos siempre.
+              </p>
+              <p style={{ fontSize: 13, margin: '0 0 12px' }}>
+                <Link href="/metodologia" style={{ color: 'var(--accent)', fontWeight: 600 }}>
+                  Metodología: fuentes, actualización y criterios →
+                </Link>
               </p>
               <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', margin: 0 }}>
                 Datos: IGAE · INE · Banco de España · PLACE · BDNS · Eurostat

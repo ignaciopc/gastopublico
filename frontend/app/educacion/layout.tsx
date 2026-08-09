@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Educación en España – Abandono Escolar y PISA',
-    description: 'Abandono 13,7% (doble que UE), PISA cayendo, 4,8% PIB en educación. Datos reales.',
+    description: 'Abandono 13,7% (doble que UE), PISA cayendo, 4,8% PIB en educación. Datos oficiales.',
     images: ['/api/og?title=Educaci%C3%B3n%20en%20Espa%C3%B1a&sub=Abandono%20escolar%2C%20PISA%20y%20gasto%202015%E2%80%932024%20%C2%B7%20Ministerio%20de%20Educaci%C3%B3n'],
   },
   alternates: { canonical: 'https://gastopublico.es/educacion' },

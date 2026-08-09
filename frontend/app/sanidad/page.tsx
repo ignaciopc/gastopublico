@@ -130,14 +130,16 @@ export default function SanidadPage() {
             Ministerio de Sanidad · OCDE · Eurostat
           </div>
           <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 64px)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.05, margin: '0 0 18px', maxWidth: 900, color: '#ededeb' }}>
-            Gasto récord en sanidad.<br />
-            <span style={{ color: '#ef4d68' }}>836.000 en lista de espera.</span>
+            Gasto sanitario público<br />
+            <span style={{ color: '#ef4d68' }}>y listas de espera.</span>
           </h1>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', maxWidth: 720, lineHeight: 1.6, margin: '0 0 32px' }}>
-            España gasta <strong style={{ color: '#ef4d68' }}>85.200 millones de euros</strong> en sanidad — un máximo histórico.
-            A la vez, <strong style={{ color: '#ef4d68' }}>836.000 pacientes</strong> esperan una operación con una demora media de{' '}
-            <strong style={{ color: '#ef4d68' }}>{diasActual} días</strong>.
-            El sistema tiene médicos suficientes pero un déficit grave de <strong style={{ color: '#ef4d68' }}>135.000 enfermeras</strong>.
+            El gasto sanitario público de España es de{' '}
+            <strong style={{ color: '#ef4d68' }}>85.200 millones de euros</strong>, el valor más alto de la serie.
+            La lista de espera quirúrgica registra{' '}
+            <strong style={{ color: '#ef4d68' }}>836.000 pacientes</strong>, con una demora media de{' '}
+            <strong style={{ color: '#ef4d68' }}>{diasActual} días</strong>. La ratio de enfermería es de
+            6,1 por cada 1.000 habitantes, frente a una media de la UE de 8,5.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 1, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
             {[
@@ -337,31 +339,6 @@ export default function SanidadPage() {
         Consejo Interterritorial del Sistema Nacional de Salud
       </div>
       </div>{/* cierre del wrapper max-width */}
-
-      {/* ── QUÉ SE DEBERÍA HACER ─────────────────────────────────────── */}
-      <section style={{ background: '#0a0a0d', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '52px 0 64px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ fontSize: 11, color: '#ef4d68', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué se debería hacer?</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.1, margin: '0 0 32px' }}>
-            Cinco reformas para un SNS sostenible.
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {[
-              { titulo: 'Formación masiva de enfermeras', detalle: 'España necesita 135.000 enfermeras más para alcanzar la media europea. Hay que incrementar las plazas universitarias de Enfermería, mejorar las condiciones laborales (el 18% de las enfermeras formadas en España trabaja en el extranjero) y crear incentivos para zonas rurales.', impacto: 'Reducir la ratio paciente/enfermera y las listas de espera en 3–4 años', color: '#ef4d68' },
-              { titulo: 'Copago inteligente por renta', detalle: 'El sistema sanitario es gratuito en el punto de uso, lo que desincentiva el uso eficiente. Un copago simbólico ajustado por renta (exento para pensionistas y rentas bajas, como en Francia) reduciría las urgencias no urgentes (30–40% de los casos actuales).', impacto: 'Liberar ~3 MM de consultas innecesarias anuales', color: '#e67e22' },
-              { titulo: 'Digitalización y telemedicina', detalle: 'España tiene una historia clínica electrónica fragmentada en 17 sistemas incompatibles. La interoperabilidad permitiría a cualquier médico ver el historial completo del paciente. La telemedicina podría resolver el 35–40% de las consultas de atención primaria sin desplazamiento.', impacto: 'Ahorro estimado de 2.000–3.000 MM€/año', color: '#2563eb' },
-              { titulo: 'Autorización ágil de medicamentos y tecnología', detalle: 'El tiempo medio de acceso a nuevos medicamentos oncológicos en España es de 18 meses desde la aprobación de la EMA (media UE: 6 meses). El sistema de precio-referencia retrasa el acceso a tratamientos innovadores.', impacto: 'Acelerar el acceso a tratamientos oncológicos e innovadores', color: '#059669' },
-              { titulo: 'Gestión unificada de listas de espera', detalle: 'Hoy cada CCAA gestiona su propia lista. Un paciente con 160 días de espera en Canarias podría operarse en 40 días en País Vasco. Una lista de espera nacional con derivación interterritorial eliminaría esta inequidad.', impacto: 'Reducir la espera media al nivel de las mejores CCAA (40–60 días)', color: '#8e44ad' },
-            ].map(m => (
-              <div key={m.titulo} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${m.color}30`, borderRadius: 6, padding: '20px 18px', borderTop: `3px solid ${m.color}` }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#ededeb', marginBottom: 8, lineHeight: 1.35 }}>{m.titulo}</div>
-                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12 }}>{m.detalle}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: m.color, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'var(--font-mono), monospace' }}>→ {m.impacto}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

@@ -35,20 +35,21 @@ const NAV: NavEntry[] = [
       { href: '/sanidad', label: 'Sanidad' },
       { href: '/educacion', label: 'Educación' },
       { href: '/seguridad', label: 'Seguridad' },
-      { href: '/inmigracion', label: 'Inmigración' },
+      { href: '/inmigracion', label: 'Migración y asilo' },
     ],
   },
   {
     label: 'Gobierno',
     items: [
-      { href: '/gobierno', label: 'Análisis de gobierno' },
-      { href: '/politicos', label: 'Políticos y cargos' },
+      { href: '/gobierno', label: 'Estructura y coste' },
+      { href: '/politicos', label: 'Retribuciones de altos cargos' },
     ],
   },
   {
     label: 'Datos',
     items: [
       { href: '/datasets', label: 'Datasets' },
+      { href: '/metodologia', label: 'Metodología' },
       { href: '/alertas', label: 'Alertas' },
     ],
   },

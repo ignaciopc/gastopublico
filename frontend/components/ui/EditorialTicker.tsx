@@ -1,18 +1,19 @@
 'use client';
 
+// Patrón: la etiqueta de variación lleva el dato de contraste, no un superlativo.
 const ITEMS = [
-  { label: 'DEUDA PÚBLICA', value: '1,64 bn €', delta: '+47.800 M€', bad: true },
-  { label: 'PARO EPA', value: '11,2%', delta: '2× media UE', bad: true },
-  { label: 'GASTO 2024', value: '583 mM€', delta: '+6,4%', bad: true },
-  { label: 'INTERESES DEUDA', value: '39,9 mM€', delta: '+38% en 2a', bad: true },
-  { label: 'PENSIONES', value: '181,2 mM€', delta: '+10,9%', bad: true },
-  { label: 'RECAUDACIÓN', value: '294,7 mM€', delta: 'RÉCORD', bad: false },
-  { label: 'ASESORES', value: '740', delta: '+30% desde 2018', bad: true },
-  { label: 'MINISTERIOS', value: '22', delta: 'RÉCORD UE', bad: true },
-  { label: 'ALTOS CARGOS', value: '678 M€', delta: '+12,1%', bad: true },
-  { label: 'SUBV. PARTIDOS', value: '82,4 M€', delta: '+5,2%', bad: true },
-  { label: 'AÑOS SIN PGE', value: '7+', delta: 'RÉCORD DEMOCRACIA', bad: true },
-  { label: 'FONDOS UE SIN USAR', value: '128.500 M€', delta: 'PLAZO AGO 2026', bad: true },
+  { label: 'DEUDA PÚBLICA', value: '1,64 bn €', delta: '+47.800 M€ vs 2023' },
+  { label: 'PARO EPA', value: '11,2%', delta: 'media UE: 5,9%' },
+  { label: 'GASTO 2024', value: '583 mM€', delta: '+6,4% vs 2023' },
+  { label: 'INTERESES DEUDA', value: '39,9 mM€', delta: '+38% en 2 años' },
+  { label: 'PENSIONES', value: '181,2 mM€', delta: '+10,9% vs 2023' },
+  { label: 'RECAUDACIÓN', value: '294,7 mM€', delta: '+8,4% vs 2023' },
+  { label: 'PERSONAL EVENTUAL', value: '740', delta: '+30% desde 2018' },
+  { label: 'MINISTERIOS', value: '22', delta: 'media UE: 14' },
+  { label: 'ALTOS CARGOS', value: '678 M€', delta: '+12,1% vs 2023' },
+  { label: 'SUBV. PARTIDOS', value: '82,4 M€', delta: '+5,2% vs 2023' },
+  { label: 'PGE PRORROGADOS', value: '3er ejercicio', delta: 'último PGE: 2023' },
+  { label: 'FONDOS UE SIN EJECUTAR', value: '128.500 M€', delta: 'plazo ago 2026' },
 ];
 
 function Track() {
@@ -31,8 +32,8 @@ function Track() {
             {it.label}
           </span>
           <span style={{ fontWeight: 600 }}>{it.value}</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: it.bad ? 'var(--bad)' : 'var(--good)' }}>
-            ▲ {it.delta}
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-strong)' }}>
+            {it.delta}
           </span>
         </span>
       ))}

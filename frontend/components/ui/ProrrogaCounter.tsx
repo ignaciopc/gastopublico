@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ULTIMO_EJERCICIO_APROBADO } from './EjerciciosProrrogados';
 
-// Ley 6/2018 de Presupuestos Generales del Estado — BOE 4 de julio 2018
-const ULTIMO_PGE = new Date('2018-07-03T00:00:00');
+// Inicio de la prórroga vigente: 1 de enero de 2024, primer ejercicio regido por
+// prórroga automática de los PGE 2023 (Ley 31/2022, de 23 de diciembre).
+const INICIO_PRORROGA = new Date(`${ULTIMO_EJERCICIO_APROBADO + 1}-01-01T00:00:00`);
 
 function calcDiff() {
-  const ms = Date.now() - ULTIMO_PGE.getTime();
+  const ms = Date.now() - INICIO_PRORROGA.getTime();
   const totalDays = Math.floor(ms / 86_400_000);
   const years = Math.floor(totalDays / 365.25);
   const months = Math.floor((totalDays % 365.25) / 30.44);
@@ -14,7 +16,7 @@ function calcDiff() {
   return { totalDays, years, months, remainDays };
 }
 
-export default function SinPresupuestoCounter() {
+export default function ProrrogaCounter() {
   const [diff, setDiff] = useState(calcDiff);
 
   useEffect(() => {
@@ -36,7 +38,10 @@ export default function SinPresupuestoCounter() {
           {diff.totalDays.toLocaleString('es-ES')}
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: 10 }}>
-          días sin presupuesto propio
+          días de prórroga presupuestaria
+        </div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 6 }}>
+          Desde el 1 de enero de {ULTIMO_EJERCICIO_APROBADO + 1}
         </div>
       </div>
       <div style={{ display: 'flex', gap: 28, paddingBottom: 12 }}>

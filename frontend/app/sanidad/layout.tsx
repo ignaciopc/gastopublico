@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Sanidad en España – 836.000 en Lista de Espera',
-    description: '85.200 M€ de gasto, 836k esperando quirófano, 113 días de espera media. Datos reales.',
+    description: '85.200 M€ de gasto, 836k esperando quirófano, 113 días de espera media. Datos oficiales.',
     images: ['/api/og?title=Sanidad%20en%20Espa%C3%B1a&sub=Gasto%2C%20listas%20de%20espera%20y%20comparativa%202024%20%C2%B7%20Ministerio%20de%20Sanidad'],
   },
   alternates: { canonical: 'https://gastopublico.es/sanidad' },

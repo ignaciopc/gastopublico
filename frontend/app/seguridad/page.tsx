@@ -158,7 +158,7 @@ export default function SeguridadPage() {
           <div className="eyebrow" style={{ color: '#ef4d68', marginBottom: 10 }}>MINISTERIO DEL INTERIOR · ANUARIO ESTADÍSTICO</div>
           <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 64px)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.05, margin: '0 0 18px', maxWidth: 900, color: '#ededeb' }}>
             Seguridad en España.<br />
-            <span style={{ color: '#ef4d68' }}>Los datos reales.</span>
+            <span style={{ color: '#ef4d68' }}>Los datos oficiales.</span>
           </h1>
           <p style={{ fontSize: 16, lineHeight: 1.65, color: 'rgba(255,255,255,0.55)', maxWidth: 680, margin: '0 0 36px' }}>
             Las infracciones penales alcanzaron en 2023 su <strong style={{ color: '#ededeb' }}>máximo histórico</strong> con 2,35 millones.

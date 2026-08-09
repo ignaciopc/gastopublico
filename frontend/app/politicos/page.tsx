@@ -137,18 +137,18 @@ export default async function PoliticosPage() {
             BOE · Portal de Transparencia · Registro de Altos Cargos · 2024
           </div>
           <h1 style={{ fontSize: 'clamp(28px, 5vw, 58px)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05, margin: '0 0 16px', color: '#ededeb' }}>
-            Sueldos y cargos<br />de los políticos
+            Retribuciones<br />de altos cargos
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.55)', maxWidth: 700, margin: '0 0 32px' }}>
-            Toda la información sobre retribuciones de altos cargos es <strong style={{ color: '#ededeb' }}>información pública</strong>{' '}
-            recogida en el BOE y el Portal de Transparencia. Aquí la ponemos en un solo lugar,
-            sin tecnicismos y sin filtros.
+            Las retribuciones de los altos cargos son <strong style={{ color: '#ededeb' }}>información pública</strong>{' '}
+            por mandato de la Ley 19/2013 de Transparencia, y se publican en el BOE y en el Portal de
+            Transparencia. Esta página las reúne en un solo lugar, con la referencia normativa de cada cifra.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 1, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden', maxWidth: 860 }}>
             {[
               { label: 'Coste total altos cargos', value: '678 M€', sub: 'Incluye nóminas, complementos y gastos de representación · 2024' },
-              { label: 'Asesores nombrados a dedo', value: '740', sub: 'Récord histórico — Portal de Transparencia 2024' },
-              { label: 'Sueldo del presidente', value: '96.179 €', sub: 'Bruto anual · BOE RD 451/2012 actualizado' },
+              { label: 'Puestos de personal eventual', value: '740', sub: 'Máximo de la serie — Portal de Transparencia 2024' },
+              { label: 'Retribución del presidente', value: '96.179 €', sub: 'Bruto anual · BOE RD 451/2012 actualizado' },
               { label: 'Coches oficiales (aprox.)', value: '625 vehículos', sub: 'Presidencia + ministerios + altos cargos' },
             ].map((k, i, arr) => (
               <div key={k.label} style={{ padding: '18px 20px', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 0 }}>
@@ -218,12 +218,15 @@ export default async function PoliticosPage() {
             <div>
               <div className="eyebrow" style={{ marginBottom: 6 }}>Portal de Transparencia · 2024</div>
               <h2 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-                740 asesores nombrados a dedo
+                740 puestos de personal eventual
               </h2>
               <p style={{ fontSize: 13.5, color: 'var(--muted-strong)', margin: '0 0 20px', lineHeight: 1.6 }}>
-                Los asesores y personal de confianza se nombran sin oposición ni concurso público.
-                Su coste medio estimado es de <strong>80.000 €/año</strong> (salario + cotizaciones sociales).
-                El total supera los <strong>59 millones de euros anuales</strong>.
+                El personal eventual (art. 12 del Estatuto Básico del Empleado Público) desempeña
+                funciones de confianza o asesoramiento especial y se nombra y cesa libremente, sin
+                proceso selectivo. Su coste medio estimado es de <strong>80.000 €/año</strong>
+                {' '}(salario más cotizaciones sociales), lo que sitúa el total en torno a los{' '}
+                <strong>59 millones de euros anuales</strong>. El reparto por ministerio es una
+                estimación a partir del Portal de Transparencia.
               </p>
               <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, overflow: 'hidden' }}>
                 {ASESORES_MINISTERIO.map((a, i) => {
@@ -412,16 +415,22 @@ export default async function PoliticosPage() {
       <section style={{ padding: '52px 0', borderBottom: '1px solid var(--rule)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Portal de Transparencia · IGAE · 2024</div>
-          <h2 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 22px', letterSpacing: '-0.02em' }}>
-            Otros beneficios y gastos de representación
+          <h2 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
+            Otros gastos asociados al ejercicio del cargo
           </h2>
+          <p style={{ fontSize: 13.5, color: 'var(--muted-strong)', margin: '0 0 22px', maxWidth: 760, lineHeight: 1.6 }}>
+            Los importes de este bloque son <strong>estimaciones propias</strong> construidas a partir
+            de las secciones presupuestarias correspondientes del PGE. No proceden de una partida única
+            identificable y no deben leerse como cifras oficiales. Ver{' '}
+            <Link href="/metodologia" style={{ color: 'var(--accent)', fontWeight: 600 }}>metodología</Link>.
+          </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
             {[
               {
-                titulo: 'Avión presidencial y flota aérea',
+                titulo: 'Flota aérea de uso gubernamental',
                 importe: '~82 M€/año',
-                detalle: 'La flota del SASEMAR y el CLAEX incluye aeronaves para uso gubernamental. El TP-001 (Airbus A310) y el TP-002 tienen un coste operativo estimado de 12.000–28.000 €/hora de vuelo. En 2023 se realizaron 847 vuelos oficiales.',
-                fuente: 'Ministerio de Defensa / CLAEX',
+                detalle: 'El Grupo 45 del Ejército del Aire opera las aeronaves destinadas a transporte de autoridades del Estado. El coste incluye operación, mantenimiento y tripulaciones, e imputa al presupuesto del Ministerio de Defensa, no al de Presidencia.',
+                fuente: 'Estimación propia sobre PGE — Ministerio de Defensa',
                 color: '#2563eb',
               },
               {
@@ -434,8 +443,8 @@ export default async function PoliticosPage() {
               {
                 titulo: 'Gastos de representación',
                 importe: '~38 M€/año',
-                detalle: 'Dietas y gastos de viaje de altos cargos en el extranjero, recepciones, cenas de Estado, viajes de representación oficial. El Presidente tiene una asignación especial no sujeta a justificación detallada.',
-                fuente: 'Presupuesto Ministerio de Presidencia',
+                detalle: 'Dietas y gastos de viaje de altos cargos en el extranjero, recepciones, cenas de Estado y viajes de representación oficial. Corresponde al capítulo 2 (gastos corrientes en bienes y servicios) de la sección presupuestaria del Ministerio de la Presidencia.',
+                fuente: 'Estimación propia sobre PGE — Ministerio de la Presidencia',
                 color: '#8a1428',
               },
               {
