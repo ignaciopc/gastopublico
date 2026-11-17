@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-// Deuda pública a 1 enero 2025: ~1.640.000 M€ (Banco de España / BdE)
-// Crecimiento 2024: +47.800 M€ → 1.515 €/segundo (proyección 2025 similar)
-const DEUDA_BASELINE = 1_640_000_000_000;
-const BASELINE_DATE = new Date('2025-01-01T00:00:00').getTime();
-const RATE_PER_SECOND = 1_515; // €/s
+// Estimación. Deuda PDE de las AAPP a 31/08/2026: 1.750 mm€ (Banco de España, avance mensual
+// publicado el 21/10/2026). Agosto 2025: 1.699 mm€ (BdE, 21/10/2025).
+// Ritmo = (1.750 − 1.699) mm€ / (365 × 86.400 s) = 1.617 €/s, aplicado desde el 31/08/2026.
+const DEUDA_BASELINE = 1_750_000_000_000;
+const BASELINE_DATE = new Date('2026-08-31T23:59:59').getTime();
+const RATE_PER_SECOND = 1_617; // €/s
 
 function calcDeuda() {
   const elapsed = (Date.now() - BASELINE_DATE) / 1000;

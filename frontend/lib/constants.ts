@@ -1,8 +1,6 @@
-export const IGAE_BASE_URL =
-  'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/ejecucion/Paginas/';
-
-// IGAE publishes monthly budget execution CSVs. These are the direct download URLs.
-// Format: Estado - Ejecución mensual acumulada
+// UNVERIFIED URLs: no public IGAE page links to these CSVs and the daily sync has never
+// loaded data from them (sync_log shows the old 8-row seed being written instead).
+// IGAE publishes monthly execution as PDFs under Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria.
 export const IGAE_CSV_URLS: Record<number, string> = {
   2025: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/ejecucion/Documents/EjecucionPresupuestariaEstado2025.csv',
   2024: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/ejecucion/Documents/EjecucionPresupuestariaEstado2024.csv',
@@ -12,7 +10,8 @@ export const IGAE_CSV_URLS: Record<number, string> = {
 
 export const DATOS_GOB_API = 'https://datos.gob.es/apidata';
 
-// Plataforma de Contratación del Estado - Atom feed
+// PLACSP feed of tenders published through AGGREGATION (regional/other platforms), excluding
+// contratos menores. It is NOT the feed of State-sector contracting profiles (sindicacion_643).
 export const CONTRATACION_ATOM_FEED =
   'https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom';
 
@@ -24,27 +23,3 @@ export const CACHE_TTL = {
 } as const;
 
 export const CURRENT_EJERCICIO = 2025;
-
-export const MINISTERIOS_MAP: Record<string, string> = {
-  '01': 'Casa de S.M. el Rey',
-  '02': 'Cortes Generales',
-  '03': 'Tribunal de Cuentas',
-  '04': 'Consejo de Estado',
-  '05': 'Presidencia del Gobierno',
-  '06': 'Ministerio de Asuntos Exteriores',
-  '07': 'Ministerio de Justicia',
-  '08': 'Ministerio de Defensa',
-  '09': 'Ministerio de Hacienda',
-  '10': 'Ministerio del Interior',
-  '11': 'Ministerio de Transportes',
-  '12': 'Ministerio de Educación',
-  '13': 'Ministerio de Empleo',
-  '14': 'Ministerio de Industria',
-  '15': 'Ministerio de Agricultura',
-  '16': 'Ministerio de Sanidad',
-  '17': 'Ministerio de Medio Ambiente',
-  '18': 'Ministerio de Cultura',
-  '19': 'Ministerio de Economía',
-  '20': 'Ministerio de Ciencia e Innovación',
-  '60': 'Seguridad Social',
-};

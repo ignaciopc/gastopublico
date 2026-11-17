@@ -102,7 +102,7 @@ async function sendConfirmationEmail(email: string, tipos: string[]) {
   let unsubToken = '';
   try {
     const sb = getServerSupabase();
-    const { data } = await sb.from('alert_subscriptions').select('token').eq('email', email).maybeSingle();
+    const { data } = await sb.from('alert_subscriptions').select('token').eq('email', email.toLowerCase()).maybeSingle();
     unsubToken = data?.token ?? '';
   } catch { /* noop */ }
 
@@ -116,10 +116,10 @@ async function sendConfirmationEmail(email: string, tipos: string[]) {
     text: [
       `Hola,`,
       ``,
-      `Has activado las siguientes alertas en GastoPúblico.es:`,
+      `Hemos guardado tu suscripción a estas alertas de GastoPúblico.es:`,
       listaAlertas,
       ``,
-      `Te avisaremos en cuanto haya novedades relevantes.`,
+      `El envío de avisos aún no está activo. Te escribiremos cuando empiece a funcionar.`,
       ``,
       `Para cancelar la suscripción en cualquier momento: ${unsubLink}`,
       ``,

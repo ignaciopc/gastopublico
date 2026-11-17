@@ -1,29 +1,28 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Impuestómetro – Calcula Cuánto Pagas en Impuestos',
+  title: 'Impuestómetro 2026 – Retención de IRPF y cotizaciones de tu sueldo',
   description:
-    'Calcula cuánto pagas en IRPF y Seguridad Social según tu sueldo bruto. Descubre a qué destina el Estado cada euro de tus impuestos y cuándo llega tu Día de la Liberación Fiscal 2024.',
+    'Calcula la retención de IRPF y las cotizaciones a la Seguridad Social de un sueldo bruto en 2026 (algoritmo de retenciones de la AEAT y Orden PJC/297/2026) y su reparto según el gasto de las Administraciones Públicas por funciones en 2024 (IGAE).',
   keywords: [
-    'calculadora IRPF 2024',
-    'cuánto pago en impuestos España',
-    'impuestos sueldo bruto',
-    'día liberación fiscal 2024',
-    'calculadora seguridad social',
+    'calculadora IRPF 2026',
+    'retención IRPF nómina 2026',
+    'cotizaciones seguridad social 2026',
+    'sueldo neto 2026',
+    'día liberación fiscal 2026',
     'impuestómetro España',
-    'IRPF España calculator',
   ],
   openGraph: {
-    title: 'Impuestómetro – Calcula Cuánto Pagas en Impuestos',
-    description: 'Introduce tu sueldo bruto y descubre cuánto pagas en IRPF, a qué se destina cada euro y en qué fecha trabajas solo para ti.',
+    title: 'Impuestómetro 2026 – Retención de IRPF y cotizaciones de tu sueldo',
+    description: 'Introduce tu sueldo bruto y obtén la retención de IRPF y las cotizaciones de 2026, y su reparto según el gasto público por funciones (IGAE, 2024).',
     url: 'https://gastopublico.es/impuestometro',
-    images: [{ url: '/api/og?title=Impuest%C3%B3metro&sub=Calcula%20cu%C3%A1nto%20pagas%20en%20IRPF%20y%20Seguridad%20Social%20%C2%B7%202024', width: 1200, height: 630 }],
+    images: [{ url: '/api/og?title=Impuest%C3%B3metro&sub=Retenci%C3%B3n%20de%20IRPF%20y%20cotizaciones%20%C2%B7%202026', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Impuestómetro – Calcula Cuánto Pagas en Impuestos',
-    description: 'Calculadora IRPF 2024. Descubre cuánto pagas y cuál es tu Día de la Liberación Fiscal.',
-    images: ['/api/og?title=Impuest%C3%B3metro&sub=Calcula%20cu%C3%A1nto%20pagas%20en%20IRPF%20y%20Seguridad%20Social%20%C2%B7%202024'],
+    title: 'Impuestómetro 2026 – Retención de IRPF y cotizaciones de tu sueldo',
+    description: 'Retención de IRPF y cotizaciones de 2026 según la normativa de la AEAT y la Seguridad Social.',
+    images: ['/api/og?title=Impuest%C3%B3metro&sub=Retenci%C3%B3n%20de%20IRPF%20y%20cotizaciones%20%C2%B7%202026'],
   },
   alternates: { canonical: 'https://gastopublico.es/impuestometro' },
 };

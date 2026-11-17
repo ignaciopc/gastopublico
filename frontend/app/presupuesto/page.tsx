@@ -8,6 +8,33 @@ import PageHeader from '@/components/ui/PageHeader';
 import { PageLoader } from '@/components/ui/Spinner';
 
 type Tab = 'actual' | 'evolucion' | 'comparador';
+
+// La tabla budget_executions de Supabase (42 filas, ejercicios 2022–2024, sin mes) contiene
+// cifras de ejemplo que no coinciden con los PGE publicados (p. ej. pensiones contributivas
+// con código 271A en vez de 211A; Defensa como sección 08 en vez de 14). Mantener en false
+// hasta que esa tabla se vacíe y se recargue desde una fuente oficial con ejercicio y mes.
+const DATOS_VERIFICADOS: boolean = false;
+
+const IGAE_EJECUCION_URL = 'https://www.igae.pap.hacienda.gob.es/sitios/igae/en-GB/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria';
+
+function NoDisponible() {
+  return (
+    <section style={{ padding: '64px 0' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 12px' }}>Datos no disponibles</h2>
+        <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--muted-strong)', margin: '0 0 16px' }}>
+          Las cifras que mostraba esta página no procedían de la IGAE y no coincidían con los
+          Presupuestos Generales del Estado publicados, por lo que se han retirado. Volverán a
+          mostrarse cuando se carguen desde la fuente oficial, con el ejercicio y el mes de referencia.
+        </p>
+        <p style={{ fontSize: 13, margin: 0 }}>
+          Publicaciones oficiales de ejecución presupuestaria:{' '}
+          <a href={IGAE_EJECUCION_URL} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>IGAE ↗</a>
+        </p>
+      </div>
+    </section>
+  );
+}
 type MinOrder = 'monto' | 'ejec' | 'delta';
 
 const comparTh: React.CSSProperties = {
@@ -79,7 +106,7 @@ export default function PresupuestoPage() {
     finally { setLoadingHist(false); }
   }, [historico]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (DATOS_VERIFICADOS) load(); }, [load]);
   useEffect(() => { if (tab === 'comparador' || tab === 'evolucion') loadHist(); }, [tab, loadHist]);
 
   const stats = result?.data;
@@ -105,18 +132,32 @@ export default function PresupuestoPage() {
     { k: 'comparador', l: 'Tabla comparativa' },
   ];
 
+  const sinDatos = !DATOS_VERIFICADOS || (!!stats && stats.bySeccion.length === 0);
+
+  const header = (
+    <PageHeader
+      eyebrow="Presupuesto del Estado · Ejecución"
+      title="Ejecución del Presupuesto del Estado por sección"
+      lede="La IGAE publica cada mes la ejecución del Presupuesto del Estado: créditos, obligaciones reconocidas y pagos. Esta página la muestra por sección presupuestaria."
+      meta={[
+        { k: 'Fuente', v: 'IGAE / Ministerio de Hacienda' },
+        { k: 'Ejercicio', v: sinDatos ? '—' : String(CURRENT_EJERCICIO) },
+      ]}
+    />
+  );
+
+  if (sinDatos) {
+    return (
+      <>
+        {header}
+        <NoDisponible />
+      </>
+    );
+  }
+
   return (
     <>
-      <PageHeader
-        eyebrow={`Dashboard · Presupuestos Generales del Estado ${CURRENT_EJERCICIO}`}
-        title="583.000 millones. Y subiendo."
-        lede="Cada mes, IGAE publica la ejecución del Presupuesto. Aquí lo abrimos por ministerio, lo cruzamos con los tres últimos ejercicios y filtras por partida."
-        meta={[
-          { k: 'Fuente', v: 'IGAE / Ministerio de Hacienda' },
-          { k: 'Cobertura', v: 'Estado · OO.AA. · Seg. Social' },
-          { k: 'Ejercicio', v: String(CURRENT_EJERCICIO) },
-        ]}
-      />
+      {header}
 
       {/* Tabs */}
       <section style={{ borderBottom: '1px solid var(--rule)' }}>
@@ -153,7 +194,7 @@ export default function PresupuestoPage() {
                   {[
                     { label: 'Presupuesto inicial', value: formatEUR(stats.totalCredIniciales, true), delta: `Ejercicio ${CURRENT_EJERCICIO}`, bad: false },
                     { label: 'Créditos definitivos', value: formatEUR(stats.totalCredDefinitivos, true), delta: 'Tras modificaciones', bad: false },
-                    { label: 'Gasto real ejecutado', value: formatEUR(stats.totalObligacionesReconocidas, true), delta: 'Obligaciones reconocidas', bad: true },
+                    { label: 'Obligaciones reconocidas', value: formatEUR(stats.totalObligacionesReconocidas, true), delta: 'Gasto ejecutado', bad: false },
                     { label: 'Tasa de ejecución', value: stats.tasaEjecucionGlobal.toFixed(1) + '%', delta: 'Sobre créditos definitivos', bad: false },
                   ].map((k, i, arr) => (
                     <div key={k.label} style={{ padding: '22px 24px', borderRight: i === arr.length - 1 ? 0 : '1px solid var(--card-border)' }}>
@@ -245,10 +286,7 @@ export default function PresupuestoPage() {
               {/* Totales */}
               <div className="eyebrow" style={{ marginBottom: 10 }}>Comparador histórico</div>
               <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 24px', letterSpacing: '-0.02em' }}>
-                En tres años, el gasto del Estado ha crecido un{' '}
-                {hist.totales[2022] && hist.totales[2024]
-                  ? ((hist.totales[2024].obligacionesReconocidas / hist.totales[2022].obligacionesReconocidas - 1) * 100).toFixed(1) + '%'
-                  : '—'}
+                Obligaciones reconocidas por ejercicio
               </h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)', overflow: 'hidden', marginBottom: 32 }}>
                 {hist.años.map((año, i) => {
@@ -263,8 +301,8 @@ export default function PresupuestoPage() {
                       </div>
                       <div className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>Tasa ejec.: {t.tasaEjecucion.toFixed(1)}%</div>
                       {delta !== null && (
-                        <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--bad)' }}>
-                          ▲ {delta.toFixed(1)}% vs {hist.años[i - 1]}
+                        <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
+                          {delta >= 0 ? '+' : ''}{delta.toFixed(1)}% vs {hist.años[i - 1]}
                         </div>
                       )}
                     </div>
@@ -279,9 +317,6 @@ export default function PresupuestoPage() {
               </h3>
               <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)', padding: '28px 24px' }}>
                 {hist.secciones.slice(0, 10).map(s => {
-                  const maxVal = Math.max(
-                    ...hist.años.flatMap(a => [s.datos[a]?.obligacionesReconocidas ?? 0])
-                  );
                   const globalMax = Math.max(...hist.secciones.slice(0, 10).flatMap(sec =>
                     hist.años.map(a => sec.datos[a]?.obligacionesReconocidas ?? 0)
                   ));
@@ -357,9 +392,9 @@ export default function PresupuestoPage() {
                           ))}
                           <td className="mono" style={{
                             padding: '13px 18px', textAlign: 'right', fontWeight: 700, fontSize: 12,
-                            color: varPct === null ? 'var(--muted)' : varPct >= 0 ? 'var(--bad)' : 'var(--good)',
+                            color: 'var(--muted)',
                           }}>
-                            {varPct !== null ? `${varPct >= 0 ? '▲ +' : '▼ '}${varPct.toFixed(1)}%` : '—'}
+                            {varPct !== null ? `${varPct >= 0 ? '+' : ''}${varPct.toFixed(1)}%` : '—'}
                           </td>
                         </tr>
                       );

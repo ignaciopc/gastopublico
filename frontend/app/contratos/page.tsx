@@ -74,7 +74,7 @@ function ContratoRow({ row, last }: { row: ContratoItem; last: boolean }) {
         <div>
           <div style={{ fontWeight: 600, marginBottom: 3 }}>{row.objeto}</div>
           <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>
-            {row.organismo} · {row.proc}
+            {row.organismo}
           </div>
         </div>
         <div style={{ fontSize: 13, color: 'var(--muted-strong)' }}>{row.adjud}</div>
@@ -96,11 +96,14 @@ function ContratoRow({ row, last }: { row: ContratoItem; last: boolean }) {
           background: 'var(--card)',
           display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, fontSize: 12.5,
         }}>
-          <div><div className="eyebrow-muted" style={{ marginBottom: 4 }}>Fecha completa</div>{row.fecha} · {row.hora}</div>
-          <div><div className="eyebrow-muted" style={{ marginBottom: 4 }}>Tipo de contrato</div>{row.proc}</div>
+          <div><div className="eyebrow-muted" style={{ marginBottom: 4 }}>Último anuncio publicado</div>{row.fecha} · {row.hora}</div>
           <div>
-            <div className="eyebrow-muted" style={{ marginBottom: 4 }}>Adjudicatario</div>
+            <div className="eyebrow-muted" style={{ marginBottom: 4 }}>Estado</div>
             {row.adjud}
+          </div>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <div className="eyebrow-muted" style={{ marginBottom: 4 }}>Importe</div>
+            Presupuesto base de licitación sin impuestos: {fmtImp(row.importe)}
           </div>
           {row.enlace && row.enlace !== '#' && (
             <div style={{ gridColumn: '1 / -1' }}>
@@ -122,13 +125,14 @@ function buildStats(list: ContratoItem[]): StatsKpi[] {
   const totalHoy = hoy.reduce((a, b) => a + b.importe, 0);
   const grandes = list.filter(c => c.importe >= 5_000_000);
   const organismos = new Set(list.map(c => c.organismo)).size;
+  // media = suma de presupuestos base de licitación / nº de licitaciones cargadas
   const medio = list.length > 0 ? list.reduce((a, b) => a + b.importe, 0) / list.length : 0;
 
   return [
-    { label: 'Total adjudicado (último día)', value: fmtImp(totalHoy), delta: `${hoy.length} contratos`, bad: false },
-    { label: 'Grandes contratos', value: String(grandes.length), delta: '≥ 5 M€', bad: true },
-    { label: 'Organismos activos', value: String(organismos), delta: 'en el feed actual', bad: false },
-    { label: 'Importe medio', value: fmtImp(medio), delta: 'por licitación', bad: false },
+    { label: 'Importe licitado (último día)', value: fmtImp(totalHoy), delta: `${hoy.length} licitaciones del ${maxDate}`, bad: false },
+    { label: 'Licitaciones ≥ 5 M€', value: String(grandes.length), delta: `de ${list.length} cargadas`, bad: false },
+    { label: 'Órganos de contratación', value: String(organismos), delta: `en las ${list.length} cargadas`, bad: false },
+    { label: 'Importe medio', value: fmtImp(medio), delta: 'por licitación cargada', bad: false },
   ];
 }
 
@@ -141,7 +145,7 @@ function toItem(c: Contract): ContratoItem {
     organismo: c.organoContratante,
     proc: c.tipo,
     licit: 1,
-    adjud: c.adjudicatario || (c.estado === 'adjudicado' ? 'Adjudicado' : c.estado === 'resuelto' ? 'Resuelto' : c.estado === 'anulado' ? 'Anulado' : 'En proceso…'),
+    adjud: c.adjudicatario || (c.estado === 'adjudicado' ? 'Adjudicado' : c.estado === 'resuelto' ? 'Resuelto' : c.estado === 'anulado' ? 'Anulado' : 'En licitación'),
     estado: c.estado,
     importe: c.importe,
     flag: c.importe >= 5_000_000 ? 'grandes' : '',
@@ -235,12 +239,12 @@ export default function ContratosPage() {
       </Suspense>
       <PageHeader
         eyebrow="Contratación pública · Actualización diaria"
-        title={`${fmtImp(totalFiltrado)} en el feed actual. ¿Sabes a quién?`}
-        lede="Cada licitación y adjudicación del sector público estatal pasa por nuestro radar. Filtra por organismo, fechas, importe o tipo de contrato."
+        title={`Últimas ${list.length} licitaciones del feed de agregación de PLACSP`}
+        lede="Licitaciones publicadas en la Plataforma de Contratación del Sector Público mediante mecanismos de agregación (plataformas autonómicas y otras), excluidos los contratos menores. No incluye los perfiles del contratante del sector público estatal. Se muestran las 50 más recientes de nuestra copia, que se actualiza cada día a las 06:00 UTC. El importe es el presupuesto base de licitación sin impuestos, no el importe de adjudicación."
         meta={[
-          { k: 'Fuente', v: 'PLACE · Plataforma de Contratación' },
-          { k: 'Actualización', v: 'Cron diario · 06:00 UTC' },
-          { k: 'Contratos cargados', v: String(list.length) },
+          { k: 'Fuente', v: 'PLACSP · feed de agregación' },
+          { k: 'Actualización', v: 'Diaria · 06:00 UTC' },
+          { k: 'Licitaciones cargadas', v: String(list.length) },
         ]}
       />
 
@@ -255,8 +259,8 @@ export default function ContratosPage() {
               <div key={k.label} style={{ padding: '22px 24px', borderRight: i === stats.length - 1 ? 0 : '1px solid var(--card-border)' }}>
                 <div className="eyebrow-muted" style={{ marginBottom: 10 }}>{k.label}</div>
                 <div className="mono" style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.025em', marginBottom: 6 }}>{k.value}</div>
-                <div className="mono" style={{ fontSize: 11, color: k.bad ? 'var(--bad)' : 'var(--good)', fontWeight: 700 }}>
-                  {k.bad ? '▲ ' : '·  '}{k.delta}
+                <div className="mono" style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>
+                  {k.delta}
                 </div>
               </div>
             ))}
@@ -297,7 +301,7 @@ export default function ContratosPage() {
           }} className="contratos-filtros">
             <div>
               <div className="eyebrow-muted" style={{ marginBottom: 6 }}>Buscar</div>
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Objeto o adjudicatario…" style={inputStyle} />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Objeto del contrato…" style={inputStyle} />
             </div>
             <div>
               <div className="eyebrow-muted" style={{ marginBottom: 6 }}>Organismo</div>
@@ -325,7 +329,7 @@ export default function ContratosPage() {
               {[
                 { k: 'all', l: 'Todos' },
                 { k: 'grandes', l: '≥ 5 M€' },
-                { k: 'completados', l: '✅ Completados' },
+                { k: 'completados', l: 'Adjudicados, resueltos o anulados' },
               ].map(f => (
                 <button key={f.k} onClick={() => setFilter(f.k)} style={{
                   padding: '8px 14px',
@@ -364,7 +368,7 @@ export default function ContratosPage() {
             )}
           </div>
           <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 14 }}>
-            ⚑ <span style={{ color: 'var(--accent)' }}>grandes</span> = importe ≥ 5 M€ · Datos: PLACE · Plataforma de Contratación del Estado
+            ⚑ <span style={{ color: 'var(--accent)' }}>grandes</span> = presupuesto base de licitación sin impuestos ≥ 5 M€ · Fecha = publicación del último anuncio de la licitación · Fuente: Plataforma de Contratación del Sector Público, feed «licitaciones publicadas mediante mecanismos de agregación, excluidos contratos menores»
           </p>
         </div>
       </section>

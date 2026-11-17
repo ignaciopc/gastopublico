@@ -106,7 +106,7 @@ NEXT_PUBLIC_BASE_URL              # https://gastopublico.es en prod
 ### ✅ Fase 1 — Completada
 - [x] Presupuesto IGAE: dashboard con gráficos, tabla, selector de ejercicio (2022–2024)
 - [x] Contratos PLACE: feed en tiempo real parseado del Atom feed
-- [x] Impuestómetro: calculadora IRPF + SS 2024, distribución por partidas, día de liberación fiscal
+- [x] Impuestómetro: retención IRPF (algoritmo AEAT 2026) + cotizaciones 2026, reparto COFOG IGAE 2024
 - [x] Datasets: página open data con enlaces a CSV/JSON y docs de API
 - [x] Cron diario: sync automático a las 06:00 UTC via Vercel Cron
 - [x] Dark mode, SEO básico, sitemap, robots.txt
@@ -114,16 +114,14 @@ NEXT_PUBLIC_BASE_URL              # https://gastopublico.es en prod
 ### ✅ Fase 2 — Completada
 - [x] **Subvenciones BDNS**: integración real con API REST `https://www.pap.hacienda.gob.es/bdnstrans/api/`
       Endpoint correcto: `/api/concesiones/busqueda?anio=XXXX&page=N&pageSize=100`
-      Flujo: Supabase (cron) → BDNS directo → seed data. Cron sincroniza top 500 por importe.
-      Stats de totales (47.84bn, 37.240€ medio, 17.3% top100) vienen del informe anual BDNS 2024
-      porque la API no expone agregados — es la fuente más precisa disponible.
+      Flujo: Supabase (cron) → BDNS directo. Cron sincroniza 500 concesiones por ejecución.
+      Agregados calculados en vivo sobre lo sincronizado (ver «Estado real de los datos»).
       Archivos: `lib/data/bdns.ts`, `lib/sync/subvenciones.ts`, `app/api/subvenciones/route.ts`.
-- [x] **Comparador histórico**: implementado en `/presupuesto` (tabs "Comparador histórico" y "Tabla comparativa").
+- [ ] **Comparador histórico** en `/presupuesto`: la UI existe pero no hay datos reales (ver arriba).
 - [x] **Fix cron**: todos los syncs corren en paralelo (`Promise.all`), `maxDuration=300`.
       `syncContratosToSupabase()` ya no da timeout al correr junto con budget y BDNS.
-- [x] **Fix fallback IGAE por año**: `loadSampleData()` carga `public/data/presupuesto-{año}.json`
-      (archivos independientes para 2022, 2023, 2024). Ya no se reutiliza el fichero 2024 para
-      todos los años. URLs IGAE bloqueadas por SharePoint en dev; en Vercel funcionan directamente.
+- [x] **Fallback IGAE eliminado** (17/11/2026): los JSON de ejemplo no eran datos oficiales.
+      La descarga de CSV del IGAE nunca ha funcionado en producción (sync_log solo registró filas de ejemplo).
 - [x] **Fix namespace XML PLACE**: `lib/data/place.ts` usaba prefijo `ns2:` incorrecto.
       Corregido a `cac-place-ext:`, `cac:`, `cbc:`, `cbc-place-ext:` (CODICE 2.x).
 - [x] **Fix endpoint BDNS**: URL anterior era una SPA Angular, no una API REST.
@@ -142,15 +140,34 @@ NEXT_PUBLIC_BASE_URL              # https://gastopublico.es en prod
 - [ ] **AdSense / Carbon Ads** en footer.
 
 ## Alcance del proyecto (nov 2026)
-La web se limita a **datos de gasto público**: presupuesto (IGAE), contratos (PLACE),
-subvenciones (BDNS), deuda, impuestómetro, datasets/API, metodología y alertas.
-Las secciones `gobierno`, `politicos`, `inmigracion`, `seguridad`, `vivienda`, `paro`,
-`pensiones`, `sanidad` y `educacion` se retiraron y redirigen (308) a `/presupuesto`
-desde `next.config.ts`. El bot de X se eliminó. Si se recupera alguna sección, debe
-construirse sobre datos de gasto con fuente oficial y sin encuadre editorial.
+La web se limita a datos de gasto público: contratos (PLACE), subvenciones (BDNS), deuda,
+impuestómetro, datasets, metodología y alertas. Las secciones `gobierno`, `politicos`,
+`inmigracion`, `seguridad`, `vivienda`, `paro`, `pensiones`, `sanidad` y `educacion` se
+retiraron y redirigen (308) a `/` desde `next.config.ts`. El bot de X se eliminó.
 
-`alert_subscriptions` no tiene políticas RLS a propósito (deny-all para anon): las rutas
-`/api/alertas/*` usan `SUPABASE_SECRET_KEY`. No añadir políticas públicas a esa tabla.
+## Regla de datos: la web no puede afirmar nada que no sea verificable
+- Toda cifra mostrada lleva fuente oficial y periodo/fecha. Si no se puede verificar, no se publica.
+- Lo extrapolado (contadores) se etiqueta como «estimación» y explica su cálculo.
+- Sin adjetivos valorativos ni comparaciones elegidas para impresionar.
+- Auditoría completa del 17/11/2026: informes en el PR #2 («fix/datos-verificados»).
+
+## Estado real de los datos (auditoría 17/11/2026)
+- **Presupuesto (IGAE): NO hay datos reales.** Los CSV del IGAE nunca se han cargado; las 42
+  filas de `budget_executions` y los antiguos JSON de `public/data` eran datos de ejemplo
+  inventados. `/presupuesto` muestra «Datos no disponibles» (`DATOS_VERIFICADOS = false`) y
+  `/api/presupuesto*` devuelven 503. Pendiente: implementar la carga real y vaciar la tabla.
+- **Subvenciones (BDNS):** los agregados se calculan en vivo sobre las concesiones
+  sincronizadas (no es el total nacional). El parámetro `anio` de la API no filtra por año:
+  la columna `ejercicio` no es fiable. `tipo_beneficiario` guarda el nivel de la
+  administración concedente, no el tipo de beneficiario. `subvenciones_stats` ya no se escribe.
+- **Contratos (PLACE):** es el feed de licitaciones por agregación (no solo AGE), el importe
+  es presupuesto base de licitación sin impuestos y el adjudicatario viene vacío. El código
+  de tipo estaba invertido (corregido en `lib/data/place.ts`; las filas antiguas siguen mal).
+- **Alertas:** solo se guarda la suscripción y se manda el email de confirmación. No existe
+  envío de avisos; la UI lo indica.
+
+`alert_subscriptions` no debe tener políticas RLS públicas: las rutas `/api/alertas/*` usan
+`SUPABASE_SECRET_KEY`.
 
 ## Lo que NO hacer
 - No instalar Prisma ni otro ORM — usamos Supabase client directamente

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: '%s | GastoPublico.es',
   },
   description:
-    'Datos oficiales del gasto público español en tiempo real: presupuesto del Estado, contratos públicos y subvenciones. Fuentes: IGAE, BDNS y Plataforma de Contratación del Estado.',
+    'Datos oficiales del gasto público español, sincronizados a diario: presupuesto del Estado, contratos públicos y subvenciones. Fuentes: IGAE, BDNS y Plataforma de Contratación del Sector Público.',
   keywords: [
     'gasto público España',
     'presupuesto general estado 2024',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'GastoPublico.es – Transparencia del Gasto Público Español',
     description:
-      'Visualiza en tiempo real en qué se gastan tus impuestos. Presupuesto por ministerio, contratos públicos y subvenciones. Datos oficiales del IGAE, BDNS y PLACE.',
+      'Presupuesto del Estado por ministerio, contratos públicos y subvenciones, con la fuente oficial de cada dato. IGAE, BDNS y PLACE.',
     url: 'https://gastopublico.es',
     siteName: 'GastoPublico.es',
     locale: 'es_ES',
@@ -43,7 +43,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'GastoPublico.es – Transparencia del Gasto Público Español',
-    description: '18.490 € por segundo. Datos oficiales del presupuesto, contratos y subvenciones del Estado español.',
+    // 764.884 M€ (empleos no financieros AAPP 2025, IGAE) / (365 × 86.400 s) = 24.254 €/s
+    description: 'Las Administraciones Públicas gastaron 24.254 € por segundo en 2025 (IGAE). Datos oficiales del presupuesto, contratos y subvenciones.',
     site: '@GastoPublicoES',
     images: [OG_DEFAULT],
   },
@@ -60,7 +61,7 @@ const jsonLd = {
       '@id': 'https://gastopublico.es/#website',
       url: 'https://gastopublico.es',
       name: 'GastoPublico.es',
-      description: 'Transparencia del gasto público español en tiempo real',
+      description: 'Transparencia del gasto público español con datos oficiales',
       inLanguage: 'es-ES',
       potentialAction: {
         '@type': 'SearchAction',

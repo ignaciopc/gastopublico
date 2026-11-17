@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Contratos Públicos – Licitaciones del Estado en Tiempo Real',
+  title: 'Contratos públicos – Licitaciones publicadas por agregación en PLACSP',
   description:
-    'Feed en tiempo real de licitaciones y adjudicaciones del Estado español. Datos de la Plataforma de Contratación del Estado (PLACE). Filtra por importe, organismo contratante y adjudicatario.',
+    'Últimas licitaciones publicadas en la Plataforma de Contratación del Sector Público mediante mecanismos de agregación (sin contratos menores), actualizadas a diario. Filtra por importe, órgano de contratación y fecha.',
   keywords: [
     'contratos públicos España',
     'licitaciones estado',
@@ -13,16 +13,16 @@ export const metadata: Metadata = {
     'transparencia contratación pública',
   ],
   openGraph: {
-    title: 'Contratos Públicos – Licitaciones del Estado en Tiempo Real',
-    description: 'Licitaciones y adjudicaciones del Estado en tiempo real. Datos de PLACE filtrados por importe y organismo.',
+    title: 'Contratos públicos – Licitaciones publicadas por agregación en PLACSP',
+    description: 'Últimas licitaciones publicadas por agregación en PLACSP, actualizadas a diario.',
     url: 'https://gastopublico.es/contratos',
-    images: [{ url: '/api/og?title=Contratos%20P%C3%BAblicos&sub=Licitaciones%20y%20adjudicaciones%20en%20tiempo%20real%20%C2%B7%20PLACE', width: 1200, height: 630 }],
+    images: [{ url: '/api/og?title=Contratos%20P%C3%BAblicos&sub=Licitaciones%20publicadas%20por%20agregaci%C3%B3n%20%C2%B7%20PLACSP', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Contratos Públicos – Licitaciones del Estado en Tiempo Real',
-    description: 'Feed en tiempo real de licitaciones y adjudicaciones del Estado. Datos PLACE.',
-    images: ['/api/og?title=Contratos%20P%C3%BAblicos&sub=Licitaciones%20y%20adjudicaciones%20en%20tiempo%20real%20%C2%B7%20PLACE'],
+    title: 'Contratos públicos – Licitaciones publicadas por agregación en PLACSP',
+    description: 'Últimas licitaciones publicadas por agregación en PLACSP, actualizadas a diario.',
+    images: ['/api/og?title=Contratos%20P%C3%BAblicos&sub=Licitaciones%20publicadas%20por%20agregaci%C3%B3n%20%C2%B7%20PLACSP'],
   },
   alternates: { canonical: 'https://gastopublico.es/contratos' },
 };

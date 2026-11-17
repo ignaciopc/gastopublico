@@ -8,37 +8,24 @@ import type { ContratoRow } from '@/lib/supabase';
 import type { Contract } from '@/lib/types';
 import LiveSpendCounter from '@/components/ui/LiveSpendCounter';
 import DeudaCounter from '@/components/ui/DeudaCounter';
-import AlertaSubscribeForm from '@/components/ui/AlertaSubscribeForm';
 import ProrrogaCounter from '@/components/ui/ProrrogaCounter';
-import EjerciciosProrrogados from '@/components/ui/EjerciciosProrrogados';
+import EjerciciosProrrogados, {
+  EJERCICIOS_PRORROGADOS,
+  FECHA_VERIFICACION_PRORROGA,
+  ULTIMO_EJERCICIO_APROBADO,
+} from '@/components/ui/EjerciciosProrrogados';
 
 export const revalidate = 3600;
 
 const FEATURES = [
-  { tag: 'Calculadora', title: 'Impuestómetro', desc: 'Introduce tu sueldo bruto y descubre cuánto pagas al año, a qué se destina cada euro y en qué fecha trabajas exclusivamente para ti.', cta: 'Calcular mis impuestos', href: '/impuestometro' },
-  { tag: 'Dashboard', title: 'Presupuesto del Estado', desc: 'Ejecución mensual del PGE por ministerio. Comparador histórico 2022–2024 con datos IGAE actualizados.', cta: 'Ver presupuesto', href: '/presupuesto' },
+  { tag: 'Calculadora', title: 'Impuestómetro', desc: 'Introduce tu sueldo bruto y calcula la retención de IRPF y las cotizaciones de 2026, y cómo se reparte el gasto de las AAPP por funciones (IGAE).', cta: 'Calcular mis impuestos', href: '/impuestometro' },
   { tag: 'BDNS', title: 'Subvenciones', desc: 'Concesiones de subvenciones y ayudas públicas de la Base de Datos Nacional de Subvenciones, con beneficiario, convocante e importe.', cta: 'Ver subvenciones', href: '/subvenciones' },
-  { tag: 'Tiempo real', title: 'Contratos públicos', desc: 'Feed de licitaciones y adjudicaciones del Estado vía PLACE. Filtros por importe, organismo y adjudicatario.', cta: 'Ver contratos', href: '/contratos' },
+  { tag: 'PLACE', title: 'Contratos públicos', desc: 'Licitaciones publicadas en la Plataforma de Contratación del Sector Público, sincronizadas cada día. El importe es el presupuesto base de licitación sin impuestos.', cta: 'Ver contratos', href: '/contratos' },
   { tag: 'Banco de España · Eurostat', title: 'Deuda pública', desc: 'Evolución de la deuda de las Administraciones Públicas, coste de los intereses y comparativa europea con metodología SEC 2010.', cta: 'Ver deuda pública', href: '/deuda' },
-  { tag: 'Open data', title: 'Datasets y API', desc: 'Toda la información descargable en CSV y JSON. API REST documentada. Licencia CC-BY 4.0.', cta: 'Explorar datos', href: '/datasets' },
+  { tag: 'Open data', title: 'Datasets y API', desc: 'Los datos sincronizados de contratos y subvenciones en CSV y JSON, y los endpoints JSON que usa la web.', cta: 'Explorar datos', href: '/datasets' },
 ];
 
 const PARTIDA_COLORS = ['var(--accent)', '#8a1428', '#6b6b66', '#3a3a35', '#1a1a18'];
-
-const GASTO_MENSUAL = [
-  { mes: 'Ene', pct: 6.8, nota: 'Inicio lento — liquidaciones año anterior' },
-  { mes: 'Feb', pct: 7.2, nota: '' },
-  { mes: 'Mar', pct: 8.0, nota: '' },
-  { mes: 'Abr', pct: 8.1, nota: '' },
-  { mes: 'May', pct: 8.4, nota: '' },
-  { mes: 'Jun', pct: 8.8, nota: 'Cierre 1er semestre' },
-  { mes: 'Jul', pct: 8.3, nota: '' },
-  { mes: 'Ago', pct: 7.5, nota: 'Agosto — mínimo actividad' },
-  { mes: 'Sep', pct: 8.6, nota: '' },
-  { mes: 'Oct', pct: 8.7, nota: '' },
-  { mes: 'Nov', pct: 9.2, nota: '' },
-  { mes: 'Dic', pct: 10.4, nota: 'Efecto fin de año — pico máximo' },
-];
 
 async function getData() {
   const [rows, contratosResult] = await Promise.allSettled([
@@ -99,13 +86,7 @@ export default async function HomePage() {
               color: '#ef4d68',
             }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4d68', display: 'inline-block' }} />
-              DATOS OFICIALES · IGAE
-            </span>
-            <span style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-mono), monospace',
-            }}>
-              Actualizado · {new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
+              ESTIMACIÓN · DATOS IGAE 2025
             </span>
           </div>
 
@@ -119,9 +100,9 @@ export default async function HomePage() {
             maxWidth: 1100,
             color: '#ededeb',
           }}>
-            El Estado lleva gastados<br />
+            Las Administraciones Públicas llevan gastados<br />
             <LiveSpendCounter /><br />
-            en lo que va de año.
+            en lo que va de año (estimación).
           </h1>
 
           {/* lede */}
@@ -129,27 +110,32 @@ export default async function HomePage() {
             fontSize: 18, lineHeight: 1.55, color: 'rgba(255,255,255,0.6)',
             maxWidth: 720, margin: '0 0 28px',
           }}>
-            Unos 18.490 € por segundo: estimación a partir del gasto anual ejecutado. Esta web publica la ejecución
-            presupuestaria, la contratación pública y las subvenciones del Estado español,
-            partida a partida, a partir de fuentes oficiales actualizadas a diario.
+            Estimación: el gasto no financiero del conjunto de las Administraciones Públicas (Estado,
+            comunidades autónomas, entidades locales y Seguridad Social) fue de 764.884 M€ en 2025
+            (IGAE, contabilidad nacional), es decir, 24.254 € por segundo; el contador aplica ese ritmo
+            desde el 1 de enero. Esta web publica la contratación pública y las subvenciones (sincronizadas a diario) y
+            los datos de deuda y gasto de las AAPP, siempre con su fuente oficial.
           </p>
 
-          {/* Deuda en tiempo real */}
+          {/* Deuda de las AAPP (estimación a partir del último dato del BdE) */}
           <div style={{
             marginBottom: 28,
             padding: '14px 20px',
-            border: '1px solid rgba(239,77,104,0.25)',
+            border: '1px solid rgba(255,255,255,0.18)',
             borderRadius: 4,
-            background: 'rgba(239,77,104,0.05)',
+            background: 'rgba(255,255,255,0.03)',
             display: 'inline-flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap',
           }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono), monospace' }}>
-              Deuda pública (estimación)
+              Deuda de las AAPP (PDE, estimación)
             </span>
-            <span style={{ fontSize: 28, fontWeight: 700, color: '#ef4d68', fontFamily: 'var(--font-mono), monospace', letterSpacing: '-0.02em' }}>
+            <span style={{ fontSize: 28, fontWeight: 700, color: '#ededeb', fontFamily: 'var(--font-mono), monospace', letterSpacing: '-0.02em' }}>
               <DeudaCounter />
             </span>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-mono), monospace' }}>+1.515 €/seg</span>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-mono), monospace', maxWidth: 520, lineHeight: 1.5 }}>
+              Último dato: 1.750 mm€ a 31/08/2026 (Banco de España). Se suma +1.617 €/s, la variación
+              entre agosto de 2025 (1.699 mm€) y agosto de 2026, repartida por segundo.
+            </span>
           </div>
 
           {/* CTAs */}
@@ -163,14 +149,14 @@ export default async function HomePage() {
             }}>
               Calcula lo que pagas tú →
             </Link>
-            <Link href="/presupuesto" style={{
+            <Link href="/deuda" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '14px 22px', borderRadius: 4, fontSize: 14, fontWeight: 700,
               background: 'transparent', color: '#ededeb',
               border: '1px solid rgba(255,255,255,0.18)', textDecoration: 'none',
               letterSpacing: '0.02em',
             }}>
-              Ver el presupuesto completo
+              Ver la deuda pública
             </Link>
           </div>
 
@@ -181,24 +167,25 @@ export default async function HomePage() {
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
           }}>
-            <MiniStat label="Por segundo" value="18.490 €" />
-            <MiniStat label="Por minuto" value="1,1 M€" />
-            <MiniStat label="Por hora" value="66,5 M€" />
+            {/* 764.884 M€ (AAPP, empleos no financieros 2025, IGAE) / (365 × 86.400 s) = 24.254 €/s; ×60, ×3.600, /365 */}
+            <MiniStat label="Por segundo · 2025" value="24.254 €" />
+            <MiniStat label="Por minuto · 2025" value="1,46 M€" />
+            <MiniStat label="Por hora · 2025" value="87,3 M€" />
             <div style={{ padding: '10px 20px', flex: 1 }}>
               <div style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase',
                 color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-mono), monospace', marginBottom: 6,
-              }}>Por día</div>
+              }}>Por día · 2025</div>
               <div style={{
                 fontFamily: 'var(--font-mono), monospace', fontSize: 22,
                 fontWeight: 600, letterSpacing: '-0.02em', color: '#fff',
-              }}>1.597 M€</div>
+              }}>2.096 M€</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── SIN PRESUPUESTO DESDE 2018 ──────────────────────────────────── */}
+      {/* ── PRÓRROGA PRESUPUESTARIA ──────────────────────────────────── */}
       <section style={{ background: '#0f0f12', color: '#ededeb', padding: '52px 0', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.1fr)', gap: 48, alignItems: 'center' }}>
@@ -207,27 +194,21 @@ export default async function HomePage() {
                 <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>Ejecución presupuestaria</span>
               </div>
               <h2 style={{ fontSize: 'clamp(22px, 3vw, 34px)', fontWeight: 800, color: '#ededeb', letterSpacing: '-0.025em', lineHeight: 1.2, margin: '0 0 14px' }}>
-                España afronta {new Date().getFullYear()} con los presupuestos<br />de 2023 prorrogados por{' '}
-                <EjerciciosProrrogados style={{ color: '#ef4d68' }} />er año consecutivo.
+                Los ejercicios {EJERCICIOS_PRORROGADOS.join(', ').replace(/, (\d+)$/, ' y $1')} se rigen por
+                los presupuestos de {ULTIMO_EJERCICIO_APROBADO} prorrogados (
+                <EjerciciosProrrogados /> ejercicios).
               </h2>
               <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,0.5)', margin: '0 0 18px', maxWidth: 520 }}>
-                El último PGE aprobado por las Cortes fue el de 2023 (
+                Los últimos Presupuestos Generales del Estado aprobados por las Cortes son los de 2023 (
                 <strong style={{ color: 'rgba(255,255,255,0.8)' }}>Ley 31/2022, de 23 de diciembre</strong>).
-                Los ejercicios 2024, 2025 y 2026 se rigen por prórroga automática conforme al
-                art. 134.4 CE. En la última década, siete ejercicios han comenzado en situación
-                de prórroga: 2017, 2018, 2019, 2020, 2024, 2025 y 2026.
+                Desde 2024 se aplica su prórroga automática (art. 134.4 de la Constitución). Entre 2016 y
+                2026, siete ejercicios comenzaron en situación de prórroga: 2017 y 2018 (cuyos PGE se
+                aprobaron en junio y julio, respectivamente), 2019 y 2020 (prórroga de los PGE de 2018
+                durante todo el año) y 2024, 2025 y 2026.
               </p>
               <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.3)', margin: '0 0 18px', fontFamily: 'var(--font-mono), monospace' }}>
-                Fuente: BOE · Ministerio de Hacienda (SEPG)
+                Fuente: BOE (Ley 31/2022; Ley 3/2017; Ley 6/2018; Real Decreto-ley 16/2025). Situación verificada a {FECHA_VERIFICACION_PRORROGA}.
               </p>
-              <Link href="/presupuesto" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px',
-                borderRadius: 4, fontSize: 13, fontWeight: 700,
-                border: '1px solid rgba(255,255,255,0.2)', color: '#ededeb',
-                textDecoration: 'none', letterSpacing: '0.02em',
-              }}>
-                Ver la ejecución presupuestaria →
-              </Link>
             </div>
             <div>
               <ProrrogaCounter />
@@ -247,11 +228,11 @@ export default async function HomePage() {
                 <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>Qué es esto</span>
               </div>
               <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 10px', letterSpacing: '-0.01em' }}>
-                El presupuesto del Estado, en tiempo real
+                El gasto público, con su fuente oficial
               </h3>
               <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--muted-strong)', margin: 0 }}>
                 GastoPublico.es recopila y publica los datos oficiales del gasto público español
-                — presupuesto del Estado, contratos públicos y subvenciones — en un formato
+                — contratación pública, subvenciones, deuda y gasto de las AAPP — en un formato
                 legible para cualquier ciudadano, con la fuente oficial de cada cifra
                 y sin agregaciones que la fuente no sostenga.
               </p>
@@ -268,10 +249,10 @@ export default async function HomePage() {
                 Fuentes oficiales del Estado
               </h3>
               <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--muted-strong)', margin: 0 }}>
-                Datos del <strong>IGAE</strong> (Intervención General del Estado) para el presupuesto,
-                la <strong>Plataforma de Contratación del Estado (PLACE)</strong> para licitaciones y
-                la <strong>BDNS</strong> (Base de Datos Nacional de Subvenciones) del Ministerio de Hacienda.
-                Actualizados automáticamente cada día.
+                Datos de la <strong>IGAE</strong> (Intervención General de la Administración del Estado)
+                para el gasto y los intereses de las AAPP, la <strong>Plataforma de Contratación del Sector Público (PLACE)</strong> para
+                licitaciones y la <strong>BDNS</strong> (Base de Datos Nacional de Subvenciones). Deuda, déficit e
+                ingresos: Banco de España, Eurostat, AEAT e INE. Contratos y subvenciones se sincronizan cada día; el resto de cifras se actualizan cuando el organismo publica y llevan la fecha del dato.
               </p>
             </div>
 
@@ -286,9 +267,9 @@ export default async function HomePage() {
                 Qué puedes hacer con estos datos
               </h3>
               <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--muted-strong)', margin: 0 }}>
-                Con el <strong>Impuestómetro</strong> descubres a qué se destina cada euro que pagas en
-                impuestos. Con el <strong>Presupuesto</strong> comparas ejercicios. Con los <strong>Contratos</strong>
-                {' '}ves quién gana las licitaciones. Descárgalo todo en CSV o vía API.
+                Con el <strong>Impuestómetro</strong> calculas tu retención de IRPF y cotizaciones. En
+                {' '}<strong>Contratos</strong> y <strong>Subvenciones</strong> consultas las últimas publicaciones
+                oficiales, y en <strong>Datasets</strong> descargas lo sincronizado en CSV o JSON.
               </p>
             </div>
 
@@ -301,13 +282,13 @@ export default async function HomePage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 22, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 6 }}>IGAE · AEAT · INE · Banco de España · 2024</div>
+              <div className="eyebrow" style={{ marginBottom: 6 }}>IGAE · AEAT · INE · Banco de España · 2025</div>
               <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
                 Indicadores principales
               </h2>
             </div>
             <span className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>
-              Fuentes: IGAE / AEAT / INE / BdE
+              Fuentes: IGAE (Informe trimestral AAPP 4T 2025) / AEAT / INE / BdE
             </span>
           </div>
 
@@ -317,10 +298,13 @@ export default async function HomePage() {
             background: 'var(--card)', overflow: 'hidden',
           }}>
             {[
-              { label: 'Deuda pública', value: '1,64', unit: 'billones €', delta: '+47.800 M€', deltaLabel: 'vs. 2023', sub: '108,1% del PIB · media UE: 82,7%' },
-              { label: 'Recaudación tributaria', value: '294,7', unit: 'mM€', delta: '+8,4%', deltaLabel: 'vs. 2023', sub: 'Ingresos tributarios del Estado · AEAT' },
-              { label: 'Gasto público 2024', value: '583', unit: 'mM€', delta: '+6,4%', deltaLabel: 'vs. 2023', sub: '12.157 € por habitante' },
-              { label: 'Intereses deuda', value: '39,9', unit: 'mM€', delta: '+38%', deltaLabel: 'en 2 años', sub: '6,8% del gasto público total' },
+              // Deuda PDE 2025: 1.698.355 M€; 2024: 1.620.578 M€ → +77.777 M€ (BdE, Boletín Estadístico, tabla 2.9)
+              { label: 'Deuda de las AAPP · 2025', value: '1,70', unit: 'billones €', delta: '+77.777 M€', deltaLabel: 'vs. 2024', sub: '1.698.355 M€ · 100,5% del PIB · Banco de España (PDE), cierre 2025' },
+              { label: 'Ingresos tributarios · 2025', value: '325,4', unit: 'mM€', delta: '+10,4%', deltaLabel: 'vs. 2024', sub: '325.356 M€ · AEAT, Informe anual de recaudación tributaria 2025' },
+              // 764.884 / 725.001 − 1 = +5,5 %; 764.884e6 / 49.315.949 hab. (INE, 1/7/2025, provisional) = 15.510 €
+              { label: 'Gasto de las AAPP · 2025', value: '764,9', unit: 'mM€', delta: '+5,5%', deltaLabel: 'vs. 2024', sub: 'Empleos no financieros (IGAE) · 15.510 € por habitante (INE)' },
+              // 40.314 / 38.793 − 1 = +3,9 %; 40.314 / 764.884 = 5,3 %
+              { label: 'Intereses de la deuda · 2025', value: '40,3', unit: 'mM€', delta: '+3,9%', deltaLabel: 'vs. 2024', sub: '40.314 M€ (AAPP, D.41, IGAE) · 5,3% del gasto de las AAPP' },
             ].map((k, i, arr) => (
               <div key={k.label} style={{
                 padding: '26px 24px 22px',
@@ -350,48 +334,50 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── DÉFICIT CRÓNICO ─────────────────────────────────────────────── */}
+      {/* ── SALDO DE LAS AAPP ───────────────────────────────────────────── */}
       <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)', background: 'var(--card)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 6 }}>Eurostat / AIReF · 2008–2024</div>
+              <div className="eyebrow" style={{ marginBottom: 6 }}>Banco de España (Ministerio de Hacienda / INE) · 2008–2025</div>
               <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 4px', letterSpacing: '-0.02em' }}>
-                17 ejercicios consecutivos en déficit
+                Déficit de las Administraciones Públicas, 2008–2025
               </h2>
               <p style={{ fontSize: 13.5, color: 'var(--muted-strong)', margin: 0 }}>
-                El último ejercicio que España cerró con superávit fue 2007. Déficit en porcentaje del PIB,
-                metodología SEC 2010.
+                Necesidad de financiación en porcentaje del PIB (contabilidad nacional, SEC 2010). Las AAPP
+                registran déficit en todos los ejercicios desde 2008; el último superávit fue el de 2007
+                (20.287 M€, 1,9% del PIB).
               </p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Déficit acumulado 2008–2024</div>
-              <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'var(--font-mono), monospace', color: 'var(--bad)', letterSpacing: '-0.02em' }}>~1,1 billones €</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Suma de déficits 2008–2025 (euros corrientes)</div>
+              {/* Suma de la necesidad de financiación anual en M€, 2008–2025 (BdE, tabla 2.9) = 1.244.258 M€ */}
+              <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'var(--font-mono), monospace', letterSpacing: '-0.02em' }}>1,24 billones €</div>
             </div>
           </div>
           {/* Mini bar chart */}
           {(() => {
+            // BdE, Boletín Estadístico, tabla 2.9 «General Government deficit and debt», consultada el 17/11/2026
             const data = [
-              { y: 2008, v: 4.4 }, { y: 2009, v: 11.0 }, { y: 2010, v: 9.4 },
-              { y: 2011, v: 9.4 }, { y: 2012, v: 10.5 }, { y: 2013, v: 6.9 },
-              { y: 2014, v: 5.9 }, { y: 2015, v: 5.1 }, { y: 2016, v: 4.5 },
-              { y: 2017, v: 3.0 }, { y: 2018, v: 2.5 }, { y: 2019, v: 2.8 },
-              { y: 2020, v: 10.1 }, { y: 2021, v: 6.9 }, { y: 2022, v: 4.8 },
-              { y: 2023, v: 3.5 }, { y: 2024, v: 3.1 },
+              { y: 2008, v: 4.6 }, { y: 2009, v: 11.2 }, { y: 2010, v: 9.5 },
+              { y: 2011, v: 9.7 }, { y: 2012, v: 11.5 }, { y: 2013, v: 7.5 },
+              { y: 2014, v: 6.0 }, { y: 2015, v: 5.3 }, { y: 2016, v: 4.2 },
+              { y: 2017, v: 3.1 }, { y: 2018, v: 2.6 }, { y: 2019, v: 3.1 },
+              { y: 2020, v: 9.9 }, { y: 2021, v: 6.7 }, { y: 2022, v: 4.6 },
+              { y: 2023, v: 3.3 }, { y: 2024, v: 3.2 }, { y: 2025, v: 2.4 },
             ];
-            const max = 11.0;
+            const max = Math.max(...data.map(d => d.v));
             return (
               <>
                 <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 120, borderBottom: '1px solid var(--rule)', paddingBottom: 6 }}>
                   {data.map(d => {
                     const h = Math.round((d.v / max) * 100);
-                    const big = d.v > 5;
                     return (
                       <div key={d.y} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                        <span style={{ fontSize: 8.5, color: big ? 'var(--bad)' : 'var(--muted)', fontFamily: 'var(--font-mono), monospace', fontWeight: big ? 700 : 400 }}>
-                          {d.v}%
+                        <span style={{ fontSize: 8.5, color: 'var(--muted)', fontFamily: 'var(--font-mono), monospace' }}>
+                          {d.v.toLocaleString('es-ES', { minimumFractionDigits: 1 })}%
                         </span>
-                        <div style={{ width: '100%', height: h, background: big ? '#8a1428' : 'var(--accent)', borderRadius: '2px 2px 0 0', border: big ? '1px solid rgba(239,77,104,0.5)' : 'none' }} />
+                        <div style={{ width: '100%', height: h, background: 'var(--accent)', borderRadius: '2px 2px 0 0' }} />
                       </div>
                     );
                   })}
@@ -407,14 +393,9 @@ export default async function HomePage() {
             );
           })()}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, flexWrap: 'wrap', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 16 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'var(--muted)' }}>
-                <span style={{ width: 10, height: 10, background: '#8a1428', borderRadius: 2, display: 'inline-block', border: '1px solid rgba(239,77,104,0.5)' }} /> Déficit {'>'}5% PIB
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'var(--muted)' }}>
-                <span style={{ width: 10, height: 10, background: 'var(--accent)', borderRadius: 2, display: 'inline-block' }} /> Déficit {'<'}5% PIB
-              </span>
-            </div>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+              Fuente: Banco de España, Boletín Estadístico, tabla 2.9 (déficit: Ministerio de Hacienda; PIB: INE).
+            </span>
             <Link href="/deuda" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
               Ver deuda y déficit →
             </Link>
@@ -427,7 +408,7 @@ export default async function HomePage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 22, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 6 }}>Eurostat · OCDE · 2024</div>
+              <div className="eyebrow" style={{ marginBottom: 6 }}>Eurostat · 2025</div>
               <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
                 España en el contexto europeo
               </h2>
@@ -440,15 +421,16 @@ export default async function HomePage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'var(--background)' }}>
-                  {['Indicador', '🇪🇸 España', 'Media UE', '🇩🇪 Alemania', '🇫🇷 Francia', 'Fuente · año'].map((h, i) => (
+                  {['Indicador', '🇪🇸 España', 'UE-27', '🇩🇪 Alemania', '🇫🇷 Francia', 'Fuente · año'].map((h, i) => (
                     <th key={h} style={{ padding: '10px 16px', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: i === 0 || i === 5 ? 'left' : 'center', borderBottom: '1px solid var(--card-border)', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { m: 'Deuda / PIB', esp: '108,1%', eu: '82,7%', de: '62,7%', fr: '110,6%', fuente: 'Eurostat · 2024' },
-                  { m: 'Déficit', esp: '-3,1%', eu: '-2,9%', de: '+0,1%', fr: '-5,5%', fuente: 'Eurostat · 2024' },
+                  // Eurostat, euro indicators 22/04/2026, «Provision of deficit and debt data for 2025 – first notification»
+                  { m: 'Deuda / PIB', esp: '100,7%', eu: '81,7%', de: '63,5%', fr: '115,6%', fuente: 'Eurostat · 2025' },
+                  { m: 'Saldo / PIB', esp: '-2,4%', eu: '-3,1%', de: '-2,7%', fr: '-5,1%', fuente: 'Eurostat · 2025' },
                 ].map((row, i) => (
                   <tr key={row.m} style={{ background: i % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
                     <td style={{ padding: '11px 16px', fontSize: 13.5, fontWeight: 600, borderBottom: '1px solid var(--rule)' }}>{row.m}</td>
@@ -466,83 +448,12 @@ export default async function HomePage() {
             <strong>Criterio de selección de comparadores:</strong> Alemania y Francia son las dos mayores
             economías de la eurozona por PIB y, como España, están sujetas a las reglas fiscales del Pacto
             de Estabilidad y Crecimiento, por lo que sus cifras de deuda y déficit se calculan con la misma
-            metodología (SEC 2010). La media UE se incluye como referencia agregada de los 27 Estados miembros.
+            metodología (SEC 2010). UE-27 es el agregado de los 27 Estados miembros (no una media simple).
             La selección de comparadores condiciona la lectura: los datos completos de los 27 están disponibles
-            en Eurostat.
+            en Eurostat. Datos de la primera notificación de 2026 (nota de Eurostat de 22/04/2026); revisiones
+            posteriores pueden modificarlos (el Banco de España sitúa la deuda de España en el 100,5% del PIB
+            tras la revisión de las cuentas nacionales).
           </p>
-        </div>
-      </section>
-
-      {/* ── CUÁNDO SE GASTA ─────────────────────────────────────────────── */}
-      <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)', background: 'var(--card)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <div className="eyebrow" style={{ marginBottom: 6 }}>IGAE · Ejecución mensual 2024</div>
-              <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 4px', letterSpacing: '-0.02em' }}>
-                ¿Cuándo gasta el Estado?
-              </h2>
-              <p style={{ fontSize: 14, color: 'var(--muted-strong)', margin: 0 }}>
-                Diciembre concentra el doble de gasto que enero. El «efecto fin de año» es estructural.
-              </p>
-            </div>
-            <Link href="/presupuesto" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
-              Ver ejecución mensual →
-            </Link>
-          </div>
-
-          {/* Bar chart mensual */}
-          <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 140, marginBottom: 8 }}>
-            {GASTO_MENSUAL.map((m) => {
-              const maxPct = 10.4;
-              const h = Math.round((m.pct / maxPct) * 100);
-              const isPeak = m.pct >= 10;
-              const isLow = m.pct <= 7.2;
-              return (
-                <div key={m.mes} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                  <span style={{
-                    fontSize: 9, fontFamily: 'var(--font-mono), monospace', fontWeight: 700,
-                    color: isPeak ? 'var(--bad)' : isLow ? 'var(--muted)' : 'var(--muted-strong)',
-                  }}>{m.pct}%</span>
-                  <div style={{
-                    width: '100%', height: `${h}%`,
-                    background: isPeak ? '#8a1428' : isLow ? 'var(--card-border)' : 'var(--accent)',
-                    borderRadius: '3px 3px 0 0',
-                    border: isPeak ? '1px solid rgba(239,77,104,0.4)' : 'none',
-                    minHeight: 4,
-                  }} />
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ display: 'flex', gap: 6, borderTop: '1px solid var(--rule)', paddingTop: 6, marginBottom: 24 }}>
-            {GASTO_MENSUAL.map(m => (
-              <div key={m.mes} style={{ flex: 1, textAlign: 'center', fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono), monospace' }}>
-                {m.mes}
-              </div>
-            ))}
-          </div>
-
-          {/* Fechas clave */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
-            {[
-              { fecha: 'Día 1 de cada mes', concepto: 'Pago de pensiones', detalle: '14,5 millones de pensionistas · 12.500 M€/mes', color: 'var(--accent)' },
-              { fecha: 'Último hábil del mes', concepto: 'Nóminas de funcionarios', detalle: '3,5 millones de empleados públicos · 4.800 M€/mes', color: 'var(--accent)' },
-              { fecha: '1 abr – 30 jun', concepto: 'Campaña IRPF', detalle: 'El mayor ingreso del año. +94.000 M€ recaudados en 2024', color: '#2563eb' },
-              { fecha: 'Sep – Nov', concepto: 'Aceleración presupuestaria', detalle: 'Las unidades gastadoras aceleran para evitar devolución del crédito', color: '#e67e22' },
-              { fecha: 'Diciembre', concepto: 'Pico de gasto: "efecto fin de año"', detalle: '10,4% del gasto anual en un solo mes. Patrón repetido en toda la serie desde 2000', color: '#8a1428' },
-              { fecha: '31 de diciembre', concepto: 'Cierre del ejercicio', detalle: 'El crédito no ejecutado se devuelve al Tesoro o se incorpora al año siguiente', color: 'var(--muted)' },
-            ].map(ev => (
-              <div key={ev.concepto} style={{ padding: '14px 16px', background: 'var(--background)', border: '1px solid var(--card-border)', borderRadius: 4, display: 'flex', gap: 12 }}>
-                <div style={{ width: 3, borderRadius: 2, background: ev.color, flexShrink: 0 }} />
-                <div>
-                  <div style={{ fontSize: 10, fontFamily: 'var(--font-mono), monospace', fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: 4, textTransform: 'uppercase' }}>{ev.fecha}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 3 }}>{ev.concepto}</div>
-                  <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.4 }}>{ev.detalle}</div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -550,13 +461,14 @@ export default async function HomePage() {
       {top5.length > 0 && (
         <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)' }}>
           <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-            <div className="eyebrow" style={{ marginBottom: 6 }}>PGE {CURRENT_EJERCICIO} · Datos IGAE</div>
+            <div className="eyebrow" style={{ marginBottom: 6 }}>Ejercicio {CURRENT_EJERCICIO} · Datos IGAE</div>
             <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-              Los cinco mayores capítulos de gasto — PGE {CURRENT_EJERCICIO}
+              Las cinco secciones con más obligaciones reconocidas — {CURRENT_EJERCICIO}
             </h2>
             <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 24px' }}>
-              Obligaciones reconocidas por sección presupuestaria. El porcentaje indica la tasa de
-              ejecución: qué proporción del crédito asignado se ha ejecutado.
+              Obligaciones reconocidas por sección presupuestaria del Estado.
+              {EJERCICIOS_PRORROGADOS.includes(CURRENT_EJERCICIO) && ` En ${CURRENT_EJERCICIO} rigió el presupuesto de ${ULTIMO_EJERCICIO_APROBADO} prorrogado.`}
+              {' '}El porcentaje indica la tasa de ejecución: obligaciones reconocidas sobre crédito definitivo.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {top5.map((s, i) => {
@@ -570,7 +482,7 @@ export default async function HomePage() {
                     <span className="mono" style={{ fontSize: 13, fontWeight: 600, textAlign: 'right' }}>
                       {formatEUR(s.obligacionesReconocidas)}
                     </span>
-                    <span className="mono" style={{ fontSize: 12, color: s.tasaEjecucion >= 90 ? 'var(--good)' : s.tasaEjecucion >= 70 ? 'var(--muted)' : 'var(--bad)', textAlign: 'right' }}>
+                    <span className="mono" style={{ fontSize: 12, color: 'var(--muted)', textAlign: 'right' }}>
                       {s.tasaEjecucion.toFixed(1)}%
                     </span>
                   </div>
@@ -623,38 +535,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      {/* ── ALERTAS CTA ─────────────────────────────────────────────────── */}
-      <section style={{ padding: '56px 0', borderBottom: '1px solid var(--rule)', background: 'var(--surface)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: 56, alignItems: 'center' }}>
-            <div>
-              <div className="eyebrow" style={{ marginBottom: 8 }}>Alertas gratuitas</div>
-              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 38px)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 14px' }}>
-                Recibe un aviso cuando<br />se adjudica el próximo contrato millonario.
-              </h2>
-              <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--muted-strong)', margin: '0 0 20px', maxWidth: 520 }}>
-                Contratos {'>'} 1 M€, subvenciones destacadas de la BDNS o un resumen cada lunes.
-                Sin spam. Con un clic te das de baja.
-              </p>
-              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-                {['Contratos adjudicados > 1 M€', 'Subvenciones BDNS > 500.000 €', 'Resumen semanal los lunes'].map(item => (
-                  <span key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--muted-strong)' }}>
-                    <span style={{ color: 'var(--good)', fontWeight: 700 }}>✓</span> {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div style={{ border: '1px solid var(--card-border)', borderRadius: 6, padding: '24px 22px', background: 'var(--card)' }}>
-              <AlertaSubscribeForm compact />
-              <p style={{ margin: '12px 0 0', fontSize: 11.5, color: 'var(--muted)' }}>
-                ¿Quieres más opciones?{' '}
-                <Link href="/alertas" style={{ color: 'var(--accent)', fontWeight: 600 }}>Ver todas las alertas →</Link>
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── FEATURES ────────────────────────────────────────────────────── */}
       <section style={{ padding: '56px 0 64px' }}>
