@@ -2,25 +2,19 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-const DEFAULT_RATE = 18490;
-const STORAGE_KEY = 'gp_spend_baseline_v1';
+// Estimación. Empleos no financieros del conjunto de las AAPP en 2025: 764.884 M€
+// (IGAE, Informe trimestral de las AAPP, 4T 2025, contabilidad nacional).
+// 764.884e6 / (365 × 86.400) = 24.254 €/s, aplicado desde el 1 de enero del año en curso.
+const DEFAULT_RATE = 24_254;
+
+function secondsSinceYearStart() {
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  return (now.getTime() - yearStart.getTime()) / 1000;
+}
 
 export default function LiveSpendCounter({ ratePerSecond = DEFAULT_RATE }: { ratePerSecond?: number }) {
-  const [value, setValue] = useState(() => {
-    // Try to restore from localStorage for continuity across refreshes
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-      if (saved && saved.t && saved.v) {
-        const elapsed = (Date.now() - saved.t) / 1000;
-        return saved.v + elapsed * ratePerSecond;
-      }
-    } catch (_e) {}
-    // Fallback: approximate spending so far this year
-    const now = new Date();
-    const yearStart = new Date(now.getFullYear(), 0, 1);
-    const secondsThisYear = (now.getTime() - yearStart.getTime()) / 1000;
-    return secondsThisYear * ratePerSecond;
-  });
+  const [value, setValue] = useState(() => secondsSinceYearStart() * ratePerSecond);
 
   useEffect(() => {
     let raf: number;
@@ -34,20 +28,7 @@ export default function LiveSpendCounter({ ratePerSecond = DEFAULT_RATE }: { rat
     };
     raf = requestAnimationFrame(tick);
 
-    // Persist baseline every 5 seconds
-    const interval = setInterval(() => {
-      try {
-        setValue((v: number) => {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ t: Date.now(), v }));
-          return v;
-        });
-      } catch (_e) {}
-    }, 5000);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      clearInterval(interval);
-    };
+    return () => cancelAnimationFrame(raf);
   }, [ratePerSecond]);
 
   const bucket = Math.floor(value / 100);

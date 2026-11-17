@@ -2,55 +2,63 @@ import Link from 'next/link';
 
 export const revalidate = 86400;
 
+// «Dónde se usa» refleja las secciones existentes tras retirar /gobierno, /politicos, /paro, etc.
 const FUENTES = [
   {
-    nombre: 'IGAE — Intervención General de la Administración del Estado',
-    url: 'https://www.igae.pap.hacienda.gob.es/',
-    dato: 'Ejecución presupuestaria mensual por sección y capítulo',
-    frecuencia: 'Mensual · sincronización diaria a las 06:00 UTC',
-    donde: '/presupuesto, home',
-  },
-  {
-    nombre: 'PLACE — Plataforma de Contratación del Sector Público',
+    nombre: 'PLACSP — Plataforma de Contratación del Sector Público',
     url: 'https://contrataciondelestado.es/',
-    dato: 'Licitaciones y adjudicaciones publicadas en el feed oficial',
-    frecuencia: 'Continua · sincronización diaria a las 06:00 UTC',
-    donde: '/contratos, home',
+    dato: 'Feed de licitaciones publicadas mediante mecanismos de agregación, excluidos contratos menores',
+    frecuencia: 'Sincronización automática diaria (06:00 UTC)',
+    donde: '/contratos, portada',
   },
   {
     nombre: 'BDNS — Base de Datos Nacional de Subvenciones',
     url: 'https://www.pap.hacienda.gob.es/bdnstrans/',
-    dato: 'Concesiones de subvenciones y ayudas públicas',
-    frecuencia: 'Continua · sincronización diaria a las 06:00 UTC',
+    dato: 'Concesiones de subvenciones (copia parcial: las últimas publicadas cada día)',
+    frecuencia: 'Sincronización automática diaria (06:00 UTC)',
     donde: '/subvenciones',
   },
   {
-    nombre: 'INE — Instituto Nacional de Estadística',
-    url: 'https://www.ine.es/',
-    dato: 'Población residente (cifras de población)',
-    frecuencia: 'Semestral',
-    donde: 'home (gasto por habitante)',
+    nombre: 'IGAE — Intervención General de la Administración del Estado',
+    url: 'https://www.igae.pap.hacienda.gob.es/',
+    dato: 'Contabilidad nacional de las AAPP (gasto, intereses) y clasificación funcional del gasto (COFOG). La ejecución presupuestaria mensual del Estado no está cargada todavía',
+    frecuencia: 'Actualización manual cuando se publica',
+    donde: 'portada, /deuda, /impuestometro, /presupuesto (sin datos)',
   },
   {
     nombre: 'Banco de España',
     url: 'https://www.bde.es/',
-    dato: 'Deuda pública según el Protocolo de Déficit Excesivo',
-    frecuencia: 'Trimestral',
-    donde: '/deuda, home',
+    dato: 'Deuda de las AAPP según el Protocolo de Déficit Excesivo, total y por comunidad autónoma',
+    frecuencia: 'Actualización manual cuando se publica',
+    donde: '/deuda, portada',
   },
   {
     nombre: 'Eurostat',
     url: 'https://ec.europa.eu/eurostat',
-    dato: 'Deuda y déficit comparados entre Estados miembros (SEC 2010)',
-    frecuencia: 'Trimestral y anual',
-    donde: 'Tablas comparativas de home y /deuda',
+    dato: 'Deuda y saldo de las AAPP de los Estados miembros (SEC 2010)',
+    frecuencia: 'Actualización manual cuando se publica',
+    donde: '/deuda, portada',
+  },
+  {
+    nombre: 'AEAT — Agencia Tributaria',
+    url: 'https://sede.agenciatributaria.gob.es/',
+    dato: 'Recaudación tributaria anual y algoritmo de retenciones del IRPF',
+    frecuencia: 'Actualización manual cuando se publica',
+    donde: 'portada, /impuestometro',
+  },
+  {
+    nombre: 'INE — Instituto Nacional de Estadística',
+    url: 'https://www.ine.es/',
+    dato: 'Población residente (denominador de las cifras por habitante)',
+    frecuencia: 'Actualización manual cuando se publica',
+    donde: 'portada, /deuda',
   },
   {
     nombre: 'BOE — Boletín Oficial del Estado',
     url: 'https://www.boe.es/',
-    dato: 'Leyes de Presupuestos Generales del Estado',
-    frecuencia: 'Puntual, según publicación',
-    donde: 'home (prórroga presupuestaria)',
+    dato: 'Leyes de Presupuestos Generales del Estado y normas de cotización',
+    frecuencia: 'Actualización manual cuando se publica',
+    donde: 'portada (prórroga presupuestaria), /impuestometro',
   },
 ];
 
@@ -60,21 +68,21 @@ const NIVELES = [
     color: '#27ae60',
     titulo: 'Dato oficial',
     def: 'Cifra publicada tal cual por el organismo responsable, sin transformación por nuestra parte más allá del cambio de unidad o formato.',
-    ejemplos: 'Obligaciones reconocidas por sección del IGAE · importe de adjudicación de un contrato en PLACE · crédito inicial de un programa del PGE.',
+    ejemplos: 'Deuda PDE del Banco de España · presupuesto base de licitación de un contrato en PLACSP · importe de una concesión en la BDNS.',
   },
   {
     etiqueta: 'DERIVADO',
     color: '#2563eb',
     titulo: 'Dato derivado',
     def: 'Cálculo aritmético hecho por nosotros a partir de datos oficiales, cuyo resultado es reproducible aplicando la operación indicada a la fuente citada.',
-    ejemplos: 'Tasa de ejecución (obligaciones reconocidas ÷ crédito definitivo) · gasto por habitante (gasto total ÷ población INE) · variación interanual · sumas de partidas · gasto por segundo del contador de la portada.',
+    ejemplos: 'Gasto o deuda por habitante (importe ÷ población INE) · variación interanual · media por segundo (importe anual ÷ 31.536.000 s) · suma, media y reparto de las concesiones de la BDNS sincronizadas.',
   },
   {
     etiqueta: 'ESTIMACIÓN PROPIA',
     color: '#e67e22',
     titulo: 'Estimación propia',
     def: 'Cifra que requiere un supuesto no contenido en la fuente: un prorrateo, una imputación o una proyección. Va siempre marcada como tal y con el supuesto explicitado.',
-    ejemplos: 'Coste del personal eventual (740 puestos × 80.000 €/año) · reparto del personal eventual por ministerio · coste de la flota aérea de uso gubernamental · gastos de representación.',
+    ejemplos: 'Contadores en marcha de la portada y de /deuda, que extrapolan linealmente el último dato oficial al segundo actual.',
   },
 ];
 
@@ -100,8 +108,8 @@ export default function MetodologiaPage() {
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.55)', maxWidth: 760, margin: 0 }}>
             De dónde salen los datos, cada cuánto se actualizan, cómo se agregan y qué distingue
-            un dato oficial de uno calculado por nosotros. Si una cifra de este sitio no encaja en
-            ninguna de las tres categorías de abajo, es un error: escríbenos y la corregimos.
+            un dato oficial de uno calculado por nosotros. Una cifra de este sitio que no encaje en
+            ninguna de las tres categorías de abajo es un error y debe corregirse o retirarse.
           </p>
         </div>
       </section>
@@ -171,9 +179,9 @@ export default function MetodologiaPage() {
             Fuentes y frecuencia de actualización
           </h2>
           <p style={{ fontSize: 13.5, color: 'var(--muted-strong)', margin: '0 0 24px', maxWidth: 800, lineHeight: 1.6 }}>
-            Un proceso automático sincroniza cada día a las 06:00 UTC las fuentes que exponen API o
-            fichero descargable. El resto se actualiza manualmente cuando el organismo publica una
-            nueva edición.
+            Un proceso automático sincroniza cada día a las 06:00 UTC los contratos (PLACSP) y las
+            subvenciones (BDNS). El resto de cifras se actualiza manualmente cuando el organismo
+            publica una nueva edición; cada bloque indica la fecha o el periodo del dato.
           </p>
           <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, overflow: 'hidden', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -214,11 +222,12 @@ export default function MetodologiaPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 980 }}>
             {[
               { t: 'Ejercicio presupuestario', d: 'Salvo indicación expresa, el año que acompaña a una cifra es el ejercicio presupuestario, no el año natural de pago. Se distingue entre crédito inicial, crédito definitivo y obligaciones reconocidas; la etiqueta de cada tabla indica cuál se está mostrando.' },
-              { t: 'Agregación por sección', d: 'El presupuesto se agrega por sección presupuestaria, que es la unidad del clasificador orgánico del IGAE. No se reagrupan secciones en categorías temáticas propias.' },
-              { t: 'Tasa de ejecución', d: 'Obligaciones reconocidas divididas entre crédito definitivo del mismo ejercicio y sección. Una tasa superior al 100% indica ampliación de crédito durante el ejercicio.' },
-              { t: 'Contadores en tiempo real', d: 'Los contadores de la portada extrapolan linealmente el último dato anual publicado al segundo actual. Son una representación del ritmo medio, no una medición en vivo: el gasto real no se distribuye de forma uniforme a lo largo del año.' },
-              { t: 'Comparación entre países', d: 'Solo se comparan cifras calculadas con la misma metodología. Deuda y déficit siguen el SEC 2010 y proceden de Eurostat. Los indicadores institucionales (número de ministerios) proceden de los organigramas oficiales de cada país y no tienen definición armonizada, lo que se advierte en la tabla.' },
-              { t: 'Prórroga presupuestaria', d: 'El último PGE aprobado por las Cortes es el del ejercicio 2023 (Ley 31/2022, de 23 de diciembre). Los ejercicios posteriores se rigen por prórroga automática conforme al art. 134.4 CE. Los contadores de prórroga cuentan desde el 1 de enero de 2024.' },
+              { t: 'Agregación por sección', d: 'El presupuesto se agrega por sección presupuestaria, la unidad de la clasificación orgánica de los Presupuestos Generales del Estado. No se reagrupan secciones en categorías temáticas propias.' },
+              { t: 'Tasa de ejecución', d: 'Obligaciones reconocidas divididas entre crédito definitivo del mismo ejercicio y sección.' },
+              { t: 'Contratos y subvenciones', d: 'Son copias parciales que se amplían cada día: los totales, medias y porcentajes se calculan sobre las filas sincronizadas y se indica cuántas son. En contratos, el importe es el presupuesto base de licitación sin impuestos, no el importe adjudicado.' },
+              { t: 'Contadores (estimación)', d: 'Los contadores en marcha de la portada y de /deuda extrapolan linealmente el último dato oficial con un ritmo medio calculado a partir de datos oficiales; cada contador indica su cálculo. No son una medición en vivo: el gasto y la deuda no evolucionan de forma uniforme a lo largo del año.' },
+              { t: 'Comparación entre países', d: 'Solo se comparan cifras calculadas con la misma metodología. Deuda y déficit siguen el SEC 2010 y proceden de Eurostat.' },
+              { t: 'Prórroga presupuestaria', d: 'El último PGE aprobado por las Cortes es el del ejercicio 2023 (Ley 31/2022, de 23 de diciembre). Desde 2024 se aplica su prórroga automática conforme al art. 134.4 de la Constitución.' },
             ].map(c => (
               <div key={c.t} style={{ padding: '16px 20px', background: 'var(--background)', border: '1px solid var(--card-border)', borderRadius: 4 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>{c.t}</div>
@@ -238,10 +247,10 @@ export default function MetodologiaPage() {
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14, maxWidth: 1000 }}>
             {[
-              { t: 'Cobertura estatal, no consolidada', d: 'Los datos del IGAE cubren la Administración General del Estado. El gasto de comunidades autónomas y entidades locales no está incluido salvo mención expresa, por lo que las cifras no representan el gasto público total de España.' },
-              { t: 'Desfase de publicación', d: 'La ejecución presupuestaria se publica con semanas de retraso respecto al mes al que se refiere. El último mes disponible puede revisarse al alza o a la baja en ediciones posteriores.' },
-              { t: 'Datos de contexto no presupuestarios', d: 'Indicadores demográficos, laborales y de asilo proceden de operaciones estadísticas distintas del presupuesto, con su propia metodología y calendario. No son directamente comparables con las cifras de gasto.' },
-              { t: 'Agregaciones que no publicamos', d: 'No publicamos totales de gasto por colectivo de población, porque los servicios universales se presupuestan por residente sin distinguir origen y cualquier reparto exigiría supuestos que la fuente no sostiene.' },
+              { t: 'Perímetros distintos', d: 'La ejecución presupuestaria cubre el Estado; las cifras de contabilidad nacional (IGAE, Banco de España, Eurostat) cubren el conjunto de las Administraciones Públicas. No son directamente comparables y cada bloque indica su perímetro.' },
+              { t: 'Desfase de publicación', d: 'Las fuentes publican con retraso respecto al periodo al que se refieren y pueden revisar sus cifras en ediciones posteriores.' },
+              { t: 'Copias parciales', d: 'Contratos y subvenciones no son el total publicado por PLACSP o la BDNS: son las filas que el proceso diario ha descargado desde que empezó a funcionar.' },
+              { t: 'Presupuesto del Estado sin datos', d: 'La sección /presupuesto no muestra cifras: las que había no procedían de la IGAE. Se publicarán cuando se carguen desde la fuente oficial.' },
             ].map(c => (
               <div key={c.t} style={{ padding: '18px 20px', background: 'var(--card)', border: '1px solid var(--card-border)', borderRadius: 4 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 7 }}>{c.t}</div>
@@ -259,7 +268,7 @@ export default function MetodologiaPage() {
             <div>
               <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 10px' }}>Correcciones</h3>
               <p style={{ fontSize: 13.5, color: 'var(--muted-strong)', margin: 0, lineHeight: 1.65 }}>
-                Cuando se detecta un error en una cifra publicada, se corrige y se indica el cambio.
+                Cuando se detecta un error en una cifra publicada, se corrige o se retira.
                 Un dato sin fuente verificable se retira aunque resulte plausible: la ausencia de
                 fuente es motivo suficiente para no publicarlo.
               </p>
@@ -267,11 +276,11 @@ export default function MetodologiaPage() {
             <div>
               <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 10px' }}>Datos abiertos</h3>
               <p style={{ fontSize: 13.5, color: 'var(--muted-strong)', margin: '0 0 12px', lineHeight: 1.65 }}>
-                Todo lo que se publica aquí está disponible en CSV y JSON, con API REST documentada
-                y licencia CC-BY 4.0.
+                Los datos de contratos y subvenciones están disponibles en JSON a través de los
+                endpoints listados en la página de datos.
               </p>
               <Link href="/datasets" style={{ fontSize: 13.5, color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
-                Ir a datasets y API →
+                Ir a datos y API →
               </Link>
             </div>
           </div>

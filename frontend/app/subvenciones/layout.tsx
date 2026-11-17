@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Subvenciones del Estado 2024 – Base de Datos BDNS',
+  title: 'Subvenciones – Concesiones sincronizadas de la BDNS',
   description:
-    'Buscador de subvenciones públicas del Estado español. Datos oficiales de la Base de Datos Nacional de Subvenciones (BDNS) del Ministerio de Hacienda. Filtra por beneficiario, organismo e importe.',
+    'Buscador sobre una copia parcial, actualizada a diario, de las concesiones publicadas en la Base de Datos Nacional de Subvenciones (BDNS). Filtra por beneficiario, administración concedente e importe.',
   keywords: [
-    'subvenciones estado España 2024',
+    'subvenciones España',
     'BDNS base datos subvenciones',
     'subvenciones ministerio hacienda',
     'ayudas públicas España',
@@ -13,16 +13,16 @@ export const metadata: Metadata = {
     'transparencia subvenciones',
   ],
   openGraph: {
-    title: 'Subvenciones del Estado 2024 – Base de Datos BDNS',
-    description: 'Buscador de subvenciones públicas del Estado español. Datos oficiales de la BDNS del Ministerio de Hacienda.',
+    title: 'Subvenciones – Concesiones sincronizadas de la BDNS',
+    description: 'Buscador sobre una copia parcial, actualizada a diario, de las concesiones publicadas en la BDNS.',
     url: 'https://gastopublico.es/subvenciones',
-    images: [{ url: '/api/og?title=Subvenciones%20del%20Estado%202024&sub=Base%20de%20Datos%20Nacional%20de%20Subvenciones%20%C2%B7%20BDNS', width: 1200, height: 630 }],
+    images: [{ url: '/api/og?title=Subvenciones&sub=Base%20de%20Datos%20Nacional%20de%20Subvenciones%20%C2%B7%20BDNS', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Subvenciones del Estado 2024 – Base de Datos BDNS',
-    description: 'Buscador de subvenciones públicas. Datos oficiales BDNS del Ministerio de Hacienda.',
-    images: ['/api/og?title=Subvenciones%20del%20Estado%202024&sub=Base%20de%20Datos%20Nacional%20de%20Subvenciones%20%C2%B7%20BDNS'],
+    title: 'Subvenciones – Concesiones sincronizadas de la BDNS',
+    description: 'Buscador sobre una copia parcial de las concesiones publicadas en la BDNS.',
+    images: ['/api/og?title=Subvenciones&sub=Base%20de%20Datos%20Nacional%20de%20Subvenciones%20%C2%B7%20BDNS'],
   },
   alternates: { canonical: 'https://gastopublico.es/subvenciones' },
 };

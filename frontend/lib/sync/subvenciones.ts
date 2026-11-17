@@ -1,37 +1,5 @@
 import { getServerSupabase } from '../supabase';
-import { fetchBdnsConcesiones, getBdnsSeedData, type BdnsConcesion, type BdnsStats } from '../data/bdns';
-
-const TIPO_COLORES: Record<string, string> = {
-  'Administración Autonómica': 'var(--accent)',
-  'Administración Local': 'var(--accent)',
-  'Administración General del Estado': 'var(--accent)',
-  'Empresa pública': '#8a1428',
-  'Entidad sin ánimo de lucro': '#6b6b66',
-  'Empresa privada': '#3a3a35',
-  'Persona física': '#1a1a18',
-};
-
-function tipoColor(tipo: string): string {
-  for (const [key, color] of Object.entries(TIPO_COLORES)) {
-    if (tipo.toLowerCase().includes(key.toLowerCase())) return color;
-  }
-  return 'var(--muted)';
-}
-
-function agruparPorTipo(rows: BdnsConcesion[]): Array<{ tipo: string; pct: number; color: string }> {
-  const totals: Record<string, number> = {};
-  let grand = 0;
-  for (const r of rows) {
-    const t = r.tipoBeneficiario || 'Otros';
-    totals[t] = (totals[t] ?? 0) + r.importe;
-    grand += r.importe;
-  }
-  if (grand === 0) return [];
-  return Object.entries(totals)
-    .map(([tipo, sum]) => ({ tipo, pct: Math.round((sum / grand) * 1000) / 10, color: tipoColor(tipo) }))
-    .sort((a, b) => b.pct - a.pct)
-    .slice(0, 6);
-}
+import { fetchBdnsConcesiones, getBdnsSeedData, type BdnsStats } from '../data/bdns';
 
 export async function syncSubvencionesToSupabase(ejercicio: number): Promise<{
   rows: number;
@@ -47,7 +15,6 @@ export async function syncSubvencionesToSupabase(ejercicio: number): Promise<{
       [0, 1, 2, 3, 4].map(p => fetchBdnsConcesiones(ejercicio, p, 100))
     );
     const allRows = pages.flatMap(p => p.content);
-    const totalElements = pages[0].totalElements;
 
     if (allRows.length === 0) {
       await logSync(db, 'BDNS', ejercicio, 0, false, 'No data from BDNS', started);
@@ -81,29 +48,10 @@ export async function syncSubvencionesToSupabase(ejercicio: number): Promise<{
       .upsert(dbRows, { onConflict: 'ejercicio,num_convocatoria,beneficiario', ignoreDuplicates: false });
     if (upsertErr) throw new Error(upsertErr.message);
 
-    // Upsert stats
-    // We only fetch a 500-row sample out of millions; use seed annual-report figures
-    // for aggregate totals (totalImporte, importeMedio, pctTop100) which can't be
-    // computed correctly from a partial fetch. Keep real totalElements and porTipo.
-    const seedStats = getBdnsSeedData(ejercicio).stats;
-    const porTipo = agruparPorTipo(allRows);
-
-    const { error: statsErr } = await db
-      .from('subvenciones_stats')
-      .upsert({
-        ejercicio,
-        total_importe: seedStats.totalImporte,
-        num_concesiones: totalElements,
-        importe_medio: seedStats.importeMedio,
-        pct_top100: seedStats.pctTop100,
-        por_tipo: porTipo.length > 0 ? porTipo : seedStats.porTipo,
-        synced_at: new Date().toISOString(),
-      }, { onConflict: 'ejercicio' });
-
-    if (statsErr) throw new Error(statsErr.message);
-
+    // Los agregados se calculan en vivo sobre la tabla `subvenciones` (app/api/subvenciones).
+    // Ya no se escriben cifras de un supuesto informe anual en subvenciones_stats.
     await logSync(db, 'BDNS', ejercicio, dbRows.length, true, null, started);
-    return { rows: dbRows.length, statsUpserted: true, error: null };
+    return { rows: dbRows.length, statsUpserted: false, error: null };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     await logSync(db, 'BDNS', ejercicio, 0, false, msg, started);

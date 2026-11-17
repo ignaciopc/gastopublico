@@ -30,7 +30,8 @@ export interface BdnsStats {
 // Correct REST API base (discovered from Angular bundle)
 const BDNS_API = 'https://www.pap.hacienda.gob.es/bdnstrans/api';
 
-// Map nivel1 codes to readable beneficiary type
+// nivel1 is the level of the GRANTING administration, not the beneficiary type.
+// 'ESTATAL' never matches (BDNS uses another code), so State bodies end up in 'Otros'.
 function nivelToTipo(nivel1: string): string {
   const n = (nivel1 || '').toUpperCase();
   if (n === 'ESTATAL') return 'Administración General del Estado';
@@ -56,6 +57,8 @@ function normalizeConcesion(raw: Record<string, unknown>): BdnsConcesion {
   };
 }
 
+// The rows synced with anio=2024 have fecha_concesion between 2026-04-30 and 2026-11-13,
+// so `anio` does not filter by year of concession: treat results as "latest concessions".
 export async function fetchBdnsConcesiones(
   anio: number,
   page = 0,
@@ -98,102 +101,18 @@ export async function fetchBdnsConcesiones(
   };
 }
 
-// Datos de respaldo basados en el informe anual BDNS 2024
-// (Ministerio de Hacienda — Informe de la BDNS 2024)
+// Antes devolvía un «top» y unas estadísticas atribuidas a un «informe anual BDNS 2024»
+// que no se ha localizado (la Memoria IGAE 2024 no contiene esas cifras). Se mantiene la firma porque lib/sync/subvenciones.ts
+// la importa; ahora no aporta cifras: los agregados se calculan en /api/subvenciones
+// sobre las concesiones realmente sincronizadas.
+/** @deprecated No contiene datos. */
 export function getBdnsSeedData(anio: number): {
   top: BdnsConcesion[];
   stats: BdnsStats;
 } {
-  const top: BdnsConcesion[] = [
-    {
-      numConvocatoria: 'S0014-2024-001',
-      descripcion: 'Transferencias corrientes SEPE — Desempleo',
-      organoConvocante: 'SEPE',
-      beneficiario: 'Generalitat de Catalunya',
-      importe: 3_840_000_000,
-      fechaConcesion: '15/01/2024',
-      tipoBeneficiario: 'Administración Autonómica',
-    },
-    {
-      numConvocatoria: 'S0014-2024-002',
-      descripcion: 'Transferencias corrientes SEPE — Desempleo',
-      organoConvocante: 'SEPE',
-      beneficiario: 'Junta de Andalucía',
-      importe: 3_210_000_000,
-      fechaConcesion: '15/01/2024',
-      tipoBeneficiario: 'Administración Autonómica',
-    },
-    {
-      numConvocatoria: 'S0009-2024-001',
-      descripcion: 'Fondo de compensación interterritorial',
-      organoConvocante: 'Min. Hacienda',
-      beneficiario: 'Comunidad de Madrid',
-      importe: 2_180_000_000,
-      fechaConcesion: '20/02/2024',
-      tipoBeneficiario: 'Administración Autonómica',
-    },
-    {
-      numConvocatoria: 'S0015-2024-001',
-      descripcion: 'PAC — Pagos directos agricultura',
-      organoConvocante: 'FEGA',
-      beneficiario: 'Junta de Castilla y León',
-      importe: 1_240_000_000,
-      fechaConcesion: '10/04/2024',
-      tipoBeneficiario: 'Administración Autonómica',
-    },
-    {
-      numConvocatoria: 'S0014-2024-003',
-      descripcion: 'Transferencias corrientes SEPE — Desempleo',
-      organoConvocante: 'SEPE',
-      beneficiario: 'Generalitat Valenciana',
-      importe: 1_180_000_000,
-      fechaConcesion: '15/01/2024',
-      tipoBeneficiario: 'Administración Autonómica',
-    },
-    {
-      numConvocatoria: 'S0011-2024-001',
-      descripcion: 'Obligación de servicio público ferroviario',
-      organoConvocante: 'Min. Transportes',
-      beneficiario: 'Renfe Viajeros S.M.E.',
-      importe: 1_020_000_000,
-      fechaConcesion: '01/03/2024',
-      tipoBeneficiario: 'Empresa pública',
-    },
-    {
-      numConvocatoria: 'S0011-2024-002',
-      descripcion: 'Aportación de capital para inversiones',
-      organoConvocante: 'Min. Transportes',
-      beneficiario: 'ADIF Alta Velocidad',
-      importe: 940_000_000,
-      fechaConcesion: '01/03/2024',
-      tipoBeneficiario: 'Empresa pública',
-    },
-    {
-      numConvocatoria: 'S0016-2024-001',
-      descripcion: 'Servicios de inclusión social',
-      organoConvocante: 'Min. Inclusión',
-      beneficiario: 'Cruz Roja Española',
-      importe: 312_000_000,
-      fechaConcesion: '15/02/2024',
-      tipoBeneficiario: 'Entidad sin ánimo de lucro',
-    },
-  ];
-
-  const stats: BdnsStats = {
-    totalImporte: 47_840_000_000,
-    numConcesiones: 1_284_600,
-    importeMedio: 37_240,
-    pctTop100: 17.3,
-    porTipo: [
-      { tipo: 'Otras Administraciones Públicas', pct: 27.1, color: 'var(--accent)' },
-      { tipo: 'Empresas públicas y organismos', pct: 21.4, color: '#8a1428' },
-      { tipo: 'Entidades sin ánimo de lucro', pct: 18.2, color: '#6b6b66' },
-      { tipo: 'Empresas privadas', pct: 16.9, color: '#3a3a35' },
-      { tipo: 'Personas físicas', pct: 12.8, color: '#1a1a18' },
-      { tipo: 'Otros', pct: 3.6, color: 'var(--muted)' },
-    ],
+  void anio;
+  return {
+    top: [],
+    stats: { totalImporte: 0, numConcesiones: 0, importeMedio: 0, pctTop100: 0, porTipo: [] },
   };
-
-  void anio; // kept for API compat
-  return { top, stats };
 }

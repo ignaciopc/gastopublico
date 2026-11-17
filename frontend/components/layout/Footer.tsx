@@ -4,7 +4,6 @@ import AlertaSubscribeForm from '@/components/ui/AlertaSubscribeForm';
 const COLS = [
   { h: 'Secciones', links: [
     { l: 'Impuestómetro', href: '/impuestometro' },
-    { l: 'Presupuesto', href: '/presupuesto' },
     { l: 'Contratos', href: '/contratos' },
     { l: 'Subvenciones', href: '/subvenciones' },
     { l: 'Datasets', href: '/datasets' },
@@ -14,12 +13,12 @@ const COLS = [
     { l: 'Cómo trabajamos', href: '/metodologia' },
     { l: 'Fuentes y actualización', href: '/metodologia' },
     { l: 'Criterios de agregación', href: '/metodologia' },
-    { l: 'API pública', href: '/datasets' },
-    { l: 'Licencia CC-BY 4.0', href: '/datasets' },
+    { l: 'Datos y API', href: '/datasets' },
+    { l: 'Reutilización de datos', href: '/datasets' },
   ]},
   { h: 'Datos', links: [
     { l: 'IGAE', href: 'https://www.igae.pap.hacienda.gob.es/' },
-    { l: 'PLACE', href: 'https://contrataciondelestado.es/' },
+    { l: 'PLACSP', href: 'https://contrataciondelestado.es/' },
     { l: 'BDNS', href: 'https://www.pap.hacienda.gob.es/bdnstrans/' },
     { l: 'Banco de España', href: 'https://www.bde.es/' },
   ]},
@@ -34,12 +33,12 @@ export default function Footer() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 48, alignItems: 'center' }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 6 }}>Alertas gratuitas</div>
+              <div className="eyebrow" style={{ marginBottom: 6 }}>Alertas por email</div>
               <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 4px', letterSpacing: '-0.01em' }}>
-                Saber antes que nadie dónde va tu dinero.
+                Suscripción a avisos sobre contratos y subvenciones.
               </p>
               <p style={{ fontSize: 13, color: 'var(--muted-strong)', margin: 0 }}>
-                Contratos &gt; 1 M€ · Subvenciones BDNS · Resumen semanal — Sin spam.
+                El envío de avisos aún no está activo; por ahora solo se registra la suscripción.
               </p>
             </div>
             <AlertaSubscribeForm compact />
@@ -64,8 +63,8 @@ export default function Footer() {
                 </span>
               </div>
               <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted-strong)', margin: '0 0 10px', maxWidth: 380 }}>
-                Periodismo de datos sobre el gasto público español. Sin filiación política.
-                Sin publicidad. Sin patrocinios institucionales. Datos abiertos siempre.
+                Datos sobre el gasto público español a partir de fuentes oficiales.
+                Cada sección indica su fuente y el periodo de los datos.
               </p>
               <p style={{ fontSize: 13, margin: '0 0 12px' }}>
                 <Link href="/metodologia" style={{ color: 'var(--accent)', fontWeight: 600 }}>
@@ -73,7 +72,7 @@ export default function Footer() {
                 </Link>
               </p>
               <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', margin: 0 }}>
-                Datos: IGAE · INE · Banco de España · PLACE · BDNS · Eurostat
+                Fuentes: ver metodología
               </p>
             </div>
             {COLS.map(col => (
@@ -94,10 +93,7 @@ export default function Footer() {
           <hr className="rule" style={{ margin: '36px 0 18px' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <span className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>
-              © 2024–2026 GastoPúblico.es · Todos los datos son de fuentes oficiales del Gobierno de España
-            </span>
-            <span className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>
-              Transparencia es democracia
+              © 2024–2026 GastoPúblico.es · Fuentes indicadas en cada sección
             </span>
           </div>
         </div>

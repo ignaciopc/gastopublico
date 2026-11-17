@@ -3,9 +3,9 @@
 import { useState } from 'react';
 
 const TIPOS = [
-  { id: 'contratos_grandes', label: 'Contratos > 1 M€', desc: 'Licitaciones y adjudicaciones millonarias' },
-  { id: 'subvenciones_destacadas', label: 'Subvenciones destacadas', desc: 'Concesiones de la BDNS por encima de 500.000 €' },
-  { id: 'resumen_semanal', label: 'Resumen semanal', desc: 'Digest cada lunes con lo más relevante de la semana' },
+  { id: 'contratos_grandes', label: 'Contratos > 1 M€', desc: 'Licitaciones de más de 1 M€ (el envío aún no está activo)' },
+  { id: 'subvenciones_destacadas', label: 'Subvenciones destacadas', desc: 'Concesiones de la BDNS de más de 500.000 € (el envío aún no está activo)' },
+  { id: 'resumen_semanal', label: 'Resumen semanal', desc: 'Resumen de la semana (el envío aún no está activo)' },
 ];
 
 interface Props {

@@ -56,9 +56,11 @@ function resolveLink(l: AtomEntry['link']): string {
 
 function inferType(codeRaw: string | undefined): Contract['tipo'] {
   const code = (codeRaw || '').toLowerCase();
-  if (code === '1' || code.includes('obra')) return 'obras';
+  // CODICE ContractCode: 1 = Suministros, 2 = Servicios, 3 = Obras (1 and 3 were swapped before;
+  // rows synced earlier in Supabase still carry the swapped value).
+  if (code === '3' || code.includes('obra')) return 'obras';
   if (code === '2' || code.includes('servi')) return 'servicios';
-  if (code === '3' || code.includes('sumi')) return 'suministros';
+  if (code === '1' || code.includes('sumi')) return 'suministros';
   return 'otro';
 }
 

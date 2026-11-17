@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return RETIRED_SECTIONS.map((section) => ({
       source: `/${section}`,
-      destination: "/presupuesto",
+      destination: "/",
       permanent: true,
     }));
   },
