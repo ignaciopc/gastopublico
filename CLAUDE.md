@@ -6,8 +6,7 @@
 GastoPublicoES/
 ├── frontend/          # Aplicación Next.js 16 — toda la lógica de la web
 │   └── CLAUDE.md      # ← Guía principal del proyecto: léela siempre
-├── backend/           # Reservado (vacío actualmente)
-│   │                  # Uso previsto: bot X, scripts de scraping, workers
+├── supabase/          # Migraciones SQL
 └── .claude/
     └── settings.local.json   # Permisos de Claude Code para este repo
 ```
@@ -16,8 +15,8 @@ GastoPublicoES/
 
 **Todo el código está en `frontend/`**. Lee `frontend/CLAUDE.md` antes de tocar cualquier cosa.
 
-El directorio `backend/` está vacío — si vas a crear algo allí (bot, worker, script),
-crea primero un `backend/CLAUDE.md` describiendo su stack y propósito.
+Si hace falta un worker o script fuera de Next.js, créalo en `backend/` con su propio
+`CLAUDE.md` describiendo stack y propósito.
 
 ## Comandos desde la raíz
 
