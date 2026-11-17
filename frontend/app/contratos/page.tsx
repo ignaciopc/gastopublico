@@ -234,7 +234,7 @@ export default function ContratosPage() {
         <SearchInit onQ={setSearch} />
       </Suspense>
       <PageHeader
-        eyebrow="Contratación pública · En directo"
+        eyebrow="Contratación pública · Actualización diaria"
         title={`${fmtImp(totalFiltrado)} en el feed actual. ¿Sabes a quién?`}
         lede="Cada licitación y adjudicación del sector público estatal pasa por nuestro radar. Filtra por organismo, fechas, importe o tipo de contrato."
         meta={[

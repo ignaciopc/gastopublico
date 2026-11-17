@@ -27,9 +27,9 @@ const FUENTES = [
   {
     nombre: 'INE — Instituto Nacional de Estadística',
     url: 'https://www.ine.es/',
-    dato: 'EPA, padrón municipal, estadística de migraciones',
-    frecuencia: 'Trimestral o anual según operación',
-    donde: '/paro, /inmigracion, home',
+    dato: 'Población residente (cifras de población)',
+    frecuencia: 'Semestral',
+    donde: 'home (gasto por habitante)',
   },
   {
     nombre: 'Banco de España',
@@ -41,23 +41,16 @@ const FUENTES = [
   {
     nombre: 'Eurostat',
     url: 'https://ec.europa.eu/eurostat',
-    dato: 'Deuda, déficit y paro comparados entre Estados miembros (SEC 2010)',
+    dato: 'Deuda y déficit comparados entre Estados miembros (SEC 2010)',
     frecuencia: 'Trimestral y anual',
-    donde: 'Tablas comparativas de home y /gobierno',
+    donde: 'Tablas comparativas de home y /deuda',
   },
   {
     nombre: 'BOE — Boletín Oficial del Estado',
     url: 'https://www.boe.es/',
-    dato: 'Leyes de presupuestos, reales decretos de retribuciones y de estructura ministerial',
+    dato: 'Leyes de Presupuestos Generales del Estado',
     frecuencia: 'Puntual, según publicación',
-    donde: '/politicos, /gobierno',
-  },
-  {
-    nombre: 'Portal de Transparencia',
-    url: 'https://transparencia.gob.es/',
-    dato: 'Altos cargos, personal eventual, retribuciones declaradas',
-    frecuencia: 'Anual',
-    donde: '/politicos, /gobierno',
+    donde: 'home (prórroga presupuestaria)',
   },
 ];
 
@@ -67,7 +60,7 @@ const NIVELES = [
     color: '#27ae60',
     titulo: 'Dato oficial',
     def: 'Cifra publicada tal cual por el organismo responsable, sin transformación por nuestra parte más allá del cambio de unidad o formato.',
-    ejemplos: 'Obligaciones reconocidas por sección del IGAE · importe de adjudicación de un contrato en PLACE · retribución de un alto cargo fijada por real decreto · crédito inicial de un programa del PGE.',
+    ejemplos: 'Obligaciones reconocidas por sección del IGAE · importe de adjudicación de un contrato en PLACE · crédito inicial de un programa del PGE.',
   },
   {
     etiqueta: 'DERIVADO',

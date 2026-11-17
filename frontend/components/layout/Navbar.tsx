@@ -27,25 +27,6 @@ const NAV: NavEntry[] = [
     ],
   },
   {
-    label: 'España hoy',
-    items: [
-      { href: '/vivienda', label: 'Vivienda' },
-      { href: '/paro', label: 'Paro' },
-      { href: '/pensiones', label: 'Pensiones' },
-      { href: '/sanidad', label: 'Sanidad' },
-      { href: '/educacion', label: 'Educación' },
-      { href: '/seguridad', label: 'Seguridad' },
-      { href: '/inmigracion', label: 'Migración y asilo' },
-    ],
-  },
-  {
-    label: 'Gobierno',
-    items: [
-      { href: '/gobierno', label: 'Estructura y coste' },
-      { href: '/politicos', label: 'Retribuciones de altos cargos' },
-    ],
-  },
-  {
     label: 'Datos',
     items: [
       { href: '/datasets', label: 'Datasets' },
@@ -189,8 +170,8 @@ export default function Navbar() {
         {/* Global search */}
         <NavSearch />
 
-        {/* EN DIRECTO badge */}
-        <span className="tag tag-live mono hidden sm:inline-flex" style={{ fontSize: 10 }}>EN DIRECTO</span>
+        {/* Badge de frecuencia de actualización */}
+        <span className="tag tag-live mono hidden sm:inline-flex" style={{ fontSize: 10 }}>ACTUALIZACIÓN DIARIA</span>
 
         {/* Theme toggle */}
         <button

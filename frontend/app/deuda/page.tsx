@@ -104,11 +104,11 @@ export default function DeudaPage() {
             Banco de España · Eurostat · Ministerio de Hacienda
           </div>
           <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 64px)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.05, margin: '0 0 18px', maxWidth: 900, color: '#ededeb' }}>
-            La deuda de España sube en este momento.
+            Deuda de las Administraciones Públicas.
           </h1>
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono), monospace', marginBottom: 6 }}>
-              Deuda pública ahora mismo
+              Deuda pública (estimación)
             </div>
             <div style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: 800, color: '#ef4d68', fontFamily: 'var(--font-mono), monospace', letterSpacing: '-0.03em', lineHeight: 1 }}>
               <DeudaCounter />
@@ -118,9 +118,9 @@ export default function DeudaPage() {
             </div>
           </div>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', maxWidth: 680, lineHeight: 1.6, margin: '0 0 32px' }}>
-            El {deudaActual.pib}% del PIB. Solo en intereses pagamos{' '}
-            <strong style={{ color: '#ededeb' }}>37.500 millones al año</strong> —
-            más que todo el presupuesto de Educación. La deuda creció un{' '}
+            El {deudaActual.pib}% del PIB. En intereses se pagan{' '}
+            <strong style={{ color: '#ededeb' }}>37.500 millones al año</strong>.
+            La deuda creció un{' '}
             <strong style={{ color: '#ef4d68' }}>{Math.round(((deudaActual.total - deudaBase.total) / deudaBase.total) * 100)}%</strong>{' '}
             desde 2008.
           </p>

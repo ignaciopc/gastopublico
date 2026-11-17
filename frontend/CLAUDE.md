@@ -139,8 +139,18 @@ NEXT_PUBLIC_BASE_URL              # https://gastopublico.es en prod
       SQL migration: `supabase/migrations/20260511_alert_subscriptions.sql` (ejecutar en Supabase Dashboard).
       Requiere: `RESEND_API_KEY` en `.env.local`. Sin la clave guarda suscripciones en BD pero no envía emails.
       Alertas disponibles: `contratos_grandes` (>1M€), `subvenciones_destacadas` (>500k€), `resumen_semanal`.
-- [ ] **Bot X** (@GastoPublicoES): webhook Node.js en `backend/` cuando contratos > umbral.
 - [ ] **AdSense / Carbon Ads** en footer.
+
+## Alcance del proyecto (nov 2026)
+La web se limita a **datos de gasto público**: presupuesto (IGAE), contratos (PLACE),
+subvenciones (BDNS), deuda, impuestómetro, datasets/API, metodología y alertas.
+Las secciones `gobierno`, `politicos`, `inmigracion`, `seguridad`, `vivienda`, `paro`,
+`pensiones`, `sanidad` y `educacion` se retiraron y redirigen (308) a `/presupuesto`
+desde `next.config.ts`. El bot de X se eliminó. Si se recupera alguna sección, debe
+construirse sobre datos de gasto con fuente oficial y sin encuadre editorial.
+
+`alert_subscriptions` no tiene políticas RLS a propósito (deny-all para anon): las rutas
+`/api/alertas/*` usan `SUPABASE_SECRET_KEY`. No añadir políticas públicas a esa tabla.
 
 ## Lo que NO hacer
 - No instalar Prisma ni otro ORM — usamos Supabase client directamente
