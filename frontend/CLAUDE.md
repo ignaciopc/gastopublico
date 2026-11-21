@@ -174,6 +174,10 @@ retiraron y redirigen (308) a `/` desde `next.config.ts`. El bot de X se elimin�
   mes siguiente al último cargado; enlaces sacados de la página de la IGAE o, si no, con el
   nombre `EXTRACTO_<MES>_<AÑO>_EXCEL.xlsx`. **No verificado aún desde Vercel**: revisar
   `sync_log` (source `IGAE_EXTRACTO`) a final de mes.
+- **Cargado el 21/11/2026:** septiembre de 2026 completo (secciones + capítulos + total, con el
+  mismo periodo de 2025) y los totales mensuales de enero a agosto de 2026 (para la evolución).
+  Las secciones/capítulos de enero–agosto no se cargaron; se pueden añadir con el script.
+  Siguiente extracto: octubre (la IGAE lo publica el 23/11 según su calendario 2026).
 - **Carga manual:** `node scripts/igae-a-json.mts <fichero.xlsx>` vuelca las filas en JSON
   (Node ≥ 22.18). Sirve para verificar ficheros y cargar a mano si la descarga falla.
 - **Consulta/UI:** `lib/igae/consultas.ts` → `getUltimaEjecucion()`; `/presupuesto`,
