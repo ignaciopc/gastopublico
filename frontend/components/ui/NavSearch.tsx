@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, FileText, HandCoins } from 'lucide-react';
+import { Search, X, FileText, HandCoins, PieChart } from 'lucide-react';
 
 const btnStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12,
@@ -14,6 +14,7 @@ const btnStyle: React.CSSProperties = {
 };
 
 const SECTIONS = [
+  { path: '/presupuesto', label: 'Presupuesto del Estado', desc: 'Ejecución mensual por secciones y capítulos (IGAE)', icon: PieChart },
   { path: '/contratos', label: 'Contratos públicos', desc: 'Licitaciones y adjudicaciones PLACE', icon: FileText },
   { path: '/subvenciones', label: 'Subvenciones BDNS', desc: 'Concesiones a empresas, ONGs y personas', icon: HandCoins },
 ];

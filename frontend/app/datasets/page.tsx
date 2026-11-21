@@ -21,9 +21,17 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://gastopublico.es/datasets' },
 };
 
-// Los datasets de ejecución presupuestaria (2022–2024) se retiraron: la API devolvía
-// cifras de ejemplo, no datos IGAE, y los enlaces CSV no corresponden a ficheros publicados.
 const DATASETS = [
+  {
+    id: 'presupuesto',
+    title: 'Ejecución del Presupuesto del Estado (IGAE)',
+    description: 'Último extracto mensual de ejecución del Presupuesto del Estado cargado desde la IGAE: créditos definitivos, gastos comprometidos, obligaciones reconocidas y pagos por secciones y capítulos, con el mismo periodo del año anterior. Importes en euros.',
+    source: 'IGAE',
+    formats: ['JSON'],
+    updated: 'Mensual (según el calendario de la IGAE)',
+    rows: '37 secciones + 9 capítulos',
+    apiEndpoint: '/api/presupuesto',
+  },
   {
     id: 'contratos',
     title: 'Licitaciones publicadas por agregación (PLACSP)',
@@ -54,14 +62,14 @@ export default function DatasetsPage() {
         <span className="text-xs font-bold uppercase tracking-wider text-accent">Datos · JSON</span>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">Datos y API</h1>
         <p className="text-sm text-muted mt-1">
-          Los mismos datos que muestran las secciones de contratos y subvenciones, en JSON. Sin registro ni autenticación.
+          Los mismos datos que muestran las secciones de presupuesto, contratos y subvenciones, en JSON. Sin registro ni autenticación.
         </p>
       </div>
 
       {/* Value props */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { icon: Shield, label: 'Fuentes oficiales', desc: 'PLACSP (Ministerio de Hacienda) y BDNS (IGAE)' },
+          { icon: Shield, label: 'Fuentes oficiales', desc: 'IGAE, PLACSP (Ministerio de Hacienda) y BDNS' },
           { icon: RefreshCw, label: 'Sincronización diaria', desc: 'Proceso automático cada día a las 06:00 UTC' },
           { icon: Database, label: 'Endpoints JSON', desc: 'Peticiones GET sin autenticación' },
         ].map(({ icon: Icon, label, desc }) => (

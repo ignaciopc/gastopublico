@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
+import { getUltimaEjecucion } from '@/lib/igae/consultas';
+import { IGAE_EXTRACTO_PAGINA } from '@/lib/sync/igae';
 
-// Las filas de budget_executions no proceden de la IGAE: eran datos de ejemplo que no
-// coinciden con los PGE publicados (ver lib/data/igae.ts). Hasta cargar la ejecución
-// oficial, el endpoint no sirve cifras. La implementación anterior está en el historial git.
+export const revalidate = 3600;
+
+// Último extracto de ejecución del Presupuesto del Estado cargado desde la IGAE.
+// Importes en euros (la IGAE los publica en miles de euros).
 export async function GET() {
-  return NextResponse.json(
-    { error: 'Datos de ejecución presupuestaria no disponibles: pendientes de carga desde la IGAE.' },
-    { status: 503 },
-  );
+  const datos = await getUltimaEjecucion();
+  if (!datos) {
+    return NextResponse.json({ error: 'Datos de ejecución presupuestaria no disponibles.' }, { status: 503 });
+  }
+  return NextResponse.json({
+    fuente: 'IGAE · Extracto de ejecución del Presupuesto. Administración General del Estado',
+    fuenteUrl: IGAE_EXTRACTO_PAGINA,
+    unidad: 'euros',
+    ...datos,
+  });
 }

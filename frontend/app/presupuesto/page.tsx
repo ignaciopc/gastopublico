@@ -1,21 +1,77 @@
-'use client';
-
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { BudgetSummary, HistoricoSummary } from '@/lib/types';
-import { formatEUR } from '@/lib/formatters';
-import { CURRENT_EJERCICIO } from '@/lib/constants';
 import PageHeader from '@/components/ui/PageHeader';
-import { PageLoader } from '@/components/ui/Spinner';
+import { getUltimaEjecucion, type PartidaEjecucion } from '@/lib/igae/consultas';
+import { IGAE_EXTRACTO_PAGINA } from '@/lib/sync/igae';
+import { EJERCICIOS_PRORROGADOS, ULTIMO_EJERCICIO_APROBADO } from '@/components/ui/EjerciciosProrrogados';
 
-type Tab = 'actual' | 'evolucion' | 'comparador';
+export const revalidate = 3600;
 
-// La tabla budget_executions de Supabase (42 filas, ejercicios 2022–2024, sin mes) contiene
-// cifras de ejemplo que no coinciden con los PGE publicados (p. ej. pensiones contributivas
-// con código 271A en vez de 211A; Defensa como sección 08 en vez de 14). Mantener en false
-// hasta que esa tabla se vacíe y se recargue desde una fuente oficial con ejercicio y mes.
-const DATOS_VERIFICADOS: boolean = false;
+// useGrouping 'always': separador de miles también en cifras de 4 dígitos (7.487,2), para alinear tablas.
+const NUM_1 = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: 'always' } as Intl.NumberFormatOptions);
 
-const IGAE_EJECUCION_URL = 'https://www.igae.pap.hacienda.gob.es/sitios/igae/en-GB/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria';
+// La IGAE deja sin tasa («-») algunas variaciones extremas; aquí se omiten las superiores al 500 %.
+const VARIACION_MAXIMA = 500;
+
+const millones = (euros: number) => `${NUM_1.format(euros / 1e6)} M€`;
+const milesDeMillones = (euros: number) => NUM_1.format(euros / 1e9);
+const pct = (parte: number, total: number) => (total > 0 ? `${NUM_1.format((parte / total) * 100)} %` : '—');
+const variacion = (actual: number, anterior: number | null) => {
+  if (anterior === null || anterior <= 0) return '—';
+  const v = ((actual - anterior) / anterior) * 100;
+  if (Math.abs(v) >= VARIACION_MAXIMA) return '—';
+  return `${v > 0 ? '+' : ''}${NUM_1.format(v)} %`;
+};
+
+const th: React.CSSProperties = {
+  padding: '10px 12px', textAlign: 'right', fontSize: 10.5, fontWeight: 700,
+  letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)',
+  borderBottom: '1px solid var(--card-border)', fontFamily: 'var(--font-mono), monospace',
+  whiteSpace: 'nowrap',
+};
+const td: React.CSSProperties = {
+  padding: '9px 12px', textAlign: 'right', fontSize: 13, borderBottom: '1px solid var(--rule)',
+  fontFamily: 'var(--font-mono), monospace', whiteSpace: 'nowrap',
+};
+
+function TablaPartidas({ titulo, partidas, total, ejercicio }: {
+  titulo: string; partidas: PartidaEjecucion[]; total: PartidaEjecucion; ejercicio: number;
+}) {
+  return (
+    <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)', overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 760 }}>
+        <thead>
+          <tr>
+            <th style={{ ...th, textAlign: 'left' }}>{titulo}</th>
+            <th style={th}>Créditos definitivos</th>
+            <th style={th}>Obligaciones reconocidas</th>
+            <th style={th}>% ejecutado</th>
+            <th style={th}>Oblig. mismo periodo {ejercicio - 1}</th>
+            <th style={th}>Variación</th>
+          </tr>
+        </thead>
+        <tbody>
+          {partidas.map(p => (
+            <tr key={p.nombre}>
+              <td style={{ ...td, textAlign: 'left', fontFamily: 'inherit', whiteSpace: 'normal' }}>{p.nombre}</td>
+              <td style={td}>{millones(p.creditosDefinitivos)}</td>
+              <td style={td}>{millones(p.obligacionesReconocidas)}</td>
+              <td style={td}>{pct(p.obligacionesReconocidas, p.creditosDefinitivos)}</td>
+              <td style={td}>{p.obligacionesAnterior === null ? '—' : millones(p.obligacionesAnterior)}</td>
+              <td style={td}>{variacion(p.obligacionesReconocidas, p.obligacionesAnterior)}</td>
+            </tr>
+          ))}
+          <tr style={{ fontWeight: 700 }}>
+            <td style={{ ...td, textAlign: 'left', fontFamily: 'inherit' }}>Total</td>
+            <td style={td}>{millones(total.creditosDefinitivos)}</td>
+            <td style={td}>{millones(total.obligacionesReconocidas)}</td>
+            <td style={td}>{pct(total.obligacionesReconocidas, total.creditosDefinitivos)}</td>
+            <td style={td}>{total.obligacionesAnterior === null ? '—' : millones(total.obligacionesAnterior)}</td>
+            <td style={td}>{variacion(total.obligacionesReconocidas, total.obligacionesAnterior)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function NoDisponible() {
   return (
@@ -23,392 +79,128 @@ function NoDisponible() {
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 12px' }}>Datos no disponibles</h2>
         <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--muted-strong)', margin: '0 0 16px' }}>
-          Las cifras que mostraba esta página no procedían de la IGAE y no coincidían con los
-          Presupuestos Generales del Estado publicados, por lo que se han retirado. Volverán a
-          mostrarse cuando se carguen desde la fuente oficial, con el ejercicio y el mes de referencia.
+          No se ha podido leer la ejecución presupuestaria cargada desde la IGAE.
         </p>
-        <p style={{ fontSize: 13, margin: 0 }}>
-          Publicaciones oficiales de ejecución presupuestaria:{' '}
-          <a href={IGAE_EJECUCION_URL} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>IGAE ↗</a>
-        </p>
+        <a href={IGAE_EXTRACTO_PAGINA} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontSize: 13 }}>
+          Extracto de ejecución del Presupuesto (IGAE) ↗
+        </a>
       </div>
     </section>
   );
 }
-type MinOrder = 'monto' | 'ejec' | 'delta';
 
-const comparTh: React.CSSProperties = {
-  padding: '12px 18px', textAlign: 'left', fontSize: 10.5, fontWeight: 700,
-  letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)',
-  borderBottom: '1px solid var(--card-border)',
-  fontFamily: 'var(--font-mono), monospace',
-};
+export default async function PresupuestoPage() {
+  const datos = await getUltimaEjecucion();
 
-function Gauge({ pct }: { pct: number }) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    const start = performance.now();
-    const dur = 1400;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / dur);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setVal(pct * eased);
-      if (t < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [pct]);
-  const r = 110, c = Math.PI * r;
-  const offset = c - (val / 100) * c;
-  return (
-    <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, padding: 24, background: 'var(--card)', textAlign: 'center' }}>
-      <div className="eyebrow-muted" style={{ marginBottom: 14 }}>Grado de ejecución</div>
-      <svg viewBox="0 0 260 150" style={{ width: '100%', maxWidth: 260, height: 'auto' }}>
-        <path d={`M 20 130 A ${r} ${r} 0 0 1 240 130`} fill="none" stroke="var(--rule)" strokeWidth="14" strokeLinecap="round" />
-        <path d={`M 20 130 A ${r} ${r} 0 0 1 240 130`} fill="none" stroke="var(--accent)" strokeWidth="14" strokeLinecap="round"
-          strokeDasharray={c} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.1s linear' }} />
-        <text x="130" y="120" textAnchor="middle" fontFamily="var(--font-mono), monospace" fontWeight="600" fontSize="44" fill="var(--foreground)" letterSpacing="-2">
-          {val.toFixed(1)}%
-        </text>
-      </svg>
-    </div>
-  );
-}
-
-export default function PresupuestoPage() {
-  const [tab, setTab] = useState<Tab>('actual');
-  const [result, setResult] = useState<{ data: BudgetSummary; meta: { lastUpdated: string; source: string } } | null>(null);
-  const [historico, setHistorico] = useState<{ data: HistoricoSummary } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadingHist, setLoadingHist] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [errorHist, setErrorHist] = useState<string | null>(null);
-  const [minOrder, setMinOrder] = useState<MinOrder>('monto');
-  const [minSearch, setMinSearch] = useState('');
-
-  const load = useCallback(async () => {
-    setLoading(true); setError(null);
-    try {
-      const res = await fetch(`/api/presupuesto?ejercicio=${CURRENT_EJERCICIO}`);
-      if (!res.ok) throw new Error('Error');
-      setResult(await res.json());
-    } catch { setError('No se pudieron cargar los datos.'); }
-    finally { setLoading(false); }
-  }, []);
-
-  const loadHist = useCallback(async () => {
-    if (historico) return;
-    setLoadingHist(true); setErrorHist(null);
-    try {
-      const res = await fetch('/api/presupuesto/historico');
-      if (!res.ok) throw new Error('Error');
-      setHistorico(await res.json());
-    } catch { setErrorHist('No se pudieron cargar los datos históricos.'); }
-    finally { setLoadingHist(false); }
-  }, [historico]);
-
-  useEffect(() => { if (DATOS_VERIFICADOS) load(); }, [load]);
-  useEffect(() => { if (tab === 'comparador' || tab === 'evolucion') loadHist(); }, [tab, loadHist]);
-
-  const stats = result?.data;
-  const hist = historico?.data;
-
-  const ministeriosSorted = useMemo(() => {
-    if (!stats) return [];
-    let list = [...stats.bySeccion];
-    if (minSearch.trim()) {
-      const q = minSearch.toLowerCase();
-      list = list.filter(m => m.descripcion.toLowerCase().includes(q));
-    }
-    return list.sort((a, b) => {
-      if (minOrder === 'ejec') return b.tasaEjecucion - a.tasaEjecucion;
-      if (minOrder === 'delta') return b.tasaEjecucion - a.tasaEjecucion;
-      return b.obligacionesReconocidas - a.obligacionesReconocidas;
-    }).slice(0, minSearch.trim() ? 100 : 12);
-  }, [stats, minOrder, minSearch]);
-
-  const TABS: { k: Tab; l: string }[] = [
-    { k: 'actual', l: 'Año actual' },
-    { k: 'evolucion', l: 'Comparador histórico' },
-    { k: 'comparador', l: 'Tabla comparativa' },
-  ];
-
-  const sinDatos = !DATOS_VERIFICADOS || (!!stats && stats.bySeccion.length === 0);
-
-  const header = (
-    <PageHeader
-      eyebrow="Presupuesto del Estado · Ejecución"
-      title="Ejecución del Presupuesto del Estado por sección"
-      lede="La IGAE publica cada mes la ejecución del Presupuesto del Estado: créditos, obligaciones reconocidas y pagos. Esta página la muestra por sección presupuestaria."
-      meta={[
-        { k: 'Fuente', v: 'IGAE / Ministerio de Hacienda' },
-        { k: 'Ejercicio', v: sinDatos ? '—' : String(CURRENT_EJERCICIO) },
-      ]}
-    />
-  );
-
-  if (sinDatos) {
+  if (!datos) {
     return (
       <>
-        {header}
+        <PageHeader
+          eyebrow="Ejecución presupuestaria · IGAE"
+          title="Presupuesto del Estado"
+          lede="Ejecución del Presupuesto de gastos del Estado según el extracto mensual de la IGAE."
+        />
         <NoDisponible />
       </>
     );
   }
 
+  const { ejercicio, total } = datos;
+  const prorrogado = EJERCICIOS_PRORROGADOS.includes(ejercicio);
+  const maxMensual = Math.max(...datos.totalesMensuales.map(m => m.obligacionesReconocidas), 1);
+
+  const kpis = [
+    { k: 'Créditos definitivos', v: `${milesDeMillones(total.creditosDefinitivos)} mM€`, s: 'Crédito disponible tras modificaciones' },
+    { k: 'Obligaciones reconocidas', v: `${milesDeMillones(total.obligacionesReconocidas)} mM€`, s: `${variacion(total.obligacionesReconocidas, total.obligacionesAnterior)} vs. mismo periodo ${ejercicio - 1}` },
+    { k: 'Grado de ejecución', v: pct(total.obligacionesReconocidas, total.creditosDefinitivos), s: 'Obligaciones / créditos definitivos' },
+    { k: 'Pagos realizados', v: `${milesDeMillones(total.pagosRealizados)} mM€`, s: `${pct(total.pagosRealizados, total.obligacionesReconocidas)} de las obligaciones` },
+  ];
+
   return (
     <>
-      {header}
+      <PageHeader
+        eyebrow="Ejecución presupuestaria · IGAE"
+        title={`Presupuesto del Estado: ejecución hasta el ${datos.etiquetaCorte}`}
+        lede={`Gasto acumulado del Presupuesto del Estado (Administración General del Estado) desde el 1 de enero, por capítulos y por secciones, según el extracto mensual de la IGAE.${prorrogado ? ` En ${ejercicio} rige el presupuesto de ${ULTIMO_EJERCICIO_APROBADO} prorrogado.` : ''}`}
+        meta={[{ k: 'Ejercicio', v: String(ejercicio) }, { k: 'Corte', v: datos.fechaCorte.split('-').reverse().join('/') }]}
+      />
 
-      {/* Tabs */}
-      <section style={{ borderBottom: '1px solid var(--rule)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', display: 'flex' }}>
-          {TABS.map(t => (
-            <button key={t.k} onClick={() => setTab(t.k)} style={{
-              padding: '16px 22px', border: 0, background: 'transparent',
-              borderBottom: tab === t.k ? '2px solid var(--accent)' : '2px solid transparent',
-              color: tab === t.k ? 'var(--foreground)' : 'var(--muted)',
-              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em',
-              cursor: 'pointer', marginBottom: -1,
-            }}>{t.l}</button>
+      <section style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+          {kpis.map(k => (
+            <div key={k.k} style={{ border: '1px solid var(--card-border)', borderRadius: 4, padding: 18, background: 'var(--card)' }}>
+              <div className="eyebrow-muted" style={{ marginBottom: 8 }}>{k.k}</div>
+              <div className="mono" style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em' }}>{k.v}</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>{k.s}</div>
+            </div>
           ))}
         </div>
+        <p style={{ fontSize: 12, color: 'var(--muted)', margin: '10px 0 0' }}>
+          mM€ = miles de millones de euros. Importes acumulados hasta el {datos.etiquetaCorte}.
+        </p>
       </section>
 
-      {/* TAB: Año actual */}
-      {tab === 'actual' && (
-        loading ? <div style={{ padding: '80px 0', display: 'flex', justifyContent: 'center' }}><PageLoader /></div>
-        : error ? (
-          <div style={{ padding: '80px 24px', textAlign: 'center' }}>
-            <p style={{ color: 'var(--bad)', marginBottom: 16 }}>{error}</p>
-            <button onClick={load} style={{ padding: '10px 20px', background: 'var(--accent)', color: '#fff', border: 0, borderRadius: 4, fontWeight: 700, cursor: 'pointer' }}>Reintentar</button>
+      <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 0' }}>
+        <div className="eyebrow" style={{ marginBottom: 6 }}>Por capítulos</div>
+        <h2 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 16px' }}>En qué tipo de gasto</h2>
+        <TablaPartidas titulo="Capítulo" partidas={datos.capitulos} total={total} ejercicio={ejercicio} />
+      </section>
+
+      <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 0' }}>
+        <div className="eyebrow" style={{ marginBottom: 6 }}>Por secciones</div>
+        <h2 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 6px' }}>Quién lo gasta</h2>
+        <p style={{ fontSize: 13, color: 'var(--muted-strong)', margin: '0 0 16px', maxWidth: 820, lineHeight: 1.6 }}>
+          Las secciones corresponden a ministerios, órganos constitucionales y partidas como la deuda
+          pública, las clases pasivas o la financiación de comunidades autónomas y entidades locales.
+          Ordenadas por obligaciones reconocidas. Las variaciones respecto al año anterior pueden
+          reflejar cambios en la estructura de los ministerios o en la imputación de partidas; las
+          superiores al {VARIACION_MAXIMA} % no se muestran (—).
+        </p>
+        <TablaPartidas titulo="Sección" partidas={datos.secciones} total={total} ejercicio={ejercicio} />
+      </section>
+
+      {datos.totalesMensuales.length > 1 && (
+        <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 0' }}>
+          <div className="eyebrow" style={{ marginBottom: 6 }}>Evolución en {ejercicio}</div>
+          <h2 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 16px' }}>Obligaciones reconocidas acumuladas por mes</h2>
+          <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, padding: 18, background: 'var(--card)' }}>
+            {datos.totalesMensuales.map(m => (
+              <div key={m.mes} style={{ display: 'grid', gridTemplateColumns: '90px 1fr 110px', alignItems: 'center', gap: 12, padding: '4px 0' }}>
+                <span style={{ fontSize: 12, color: 'var(--muted-strong)', textTransform: 'capitalize' }}>
+                  {new Date(Date.UTC(ejercicio, m.mes - 1, 1)).toLocaleDateString('es-ES', { month: 'long', timeZone: 'UTC' })}
+                </span>
+                <div style={{ height: 10, background: 'var(--rule)', borderRadius: 2 }}>
+                  <div style={{ width: `${(m.obligacionesReconocidas / maxMensual) * 100}%`, height: '100%', background: 'var(--accent)', borderRadius: 2 }} />
+                </div>
+                <span className="mono" style={{ fontSize: 12, textAlign: 'right' }}>{milesDeMillones(m.obligacionesReconocidas)} mM€</span>
+              </div>
+            ))}
           </div>
-        ) : stats ? (
-          <>
-            {/* KPIs */}
-            <section style={{ padding: '28px 0 32px', borderBottom: '1px solid var(--rule)' }}>
-              <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-                <div style={{
-                  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)', overflow: 'hidden',
-                }}>
-                  {[
-                    { label: 'Presupuesto inicial', value: formatEUR(stats.totalCredIniciales, true), delta: `Ejercicio ${CURRENT_EJERCICIO}`, bad: false },
-                    { label: 'Créditos definitivos', value: formatEUR(stats.totalCredDefinitivos, true), delta: 'Tras modificaciones', bad: false },
-                    { label: 'Obligaciones reconocidas', value: formatEUR(stats.totalObligacionesReconocidas, true), delta: 'Gasto ejecutado', bad: false },
-                    { label: 'Tasa de ejecución', value: stats.tasaEjecucionGlobal.toFixed(1) + '%', delta: 'Sobre créditos definitivos', bad: false },
-                  ].map((k, i, arr) => (
-                    <div key={k.label} style={{ padding: '22px 24px', borderRight: i === arr.length - 1 ? 0 : '1px solid var(--card-border)' }}>
-                      <div className="eyebrow-muted" style={{ marginBottom: 10 }}>{k.label}</div>
-                      <div className="mono" style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-0.025em', marginBottom: 6 }}>{k.value}</div>
-                      <div className="mono" style={{ fontSize: 11, color: k.bad ? 'var(--bad)' : 'var(--muted)', fontWeight: 700 }}>{k.delta}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* Gauge + ministerios */}
-            <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)' }}>
-              <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, alignItems: 'start' }}>
-                  <Gauge pct={stats.tasaEjecucionGlobal} />
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
-                      <div>
-                        <div className="eyebrow" style={{ marginBottom: 8 }}>Por sección · Ejecución {CURRENT_EJERCICIO}</div>
-                        <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
-                          Gasto ejecutado por ministerio
-                        </h2>
-                      </div>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <input
-                          value={minSearch}
-                          onChange={e => setMinSearch(e.target.value)}
-                          placeholder="Filtrar ministerio…"
-                          style={{
-                            padding: '7px 10px', border: '1px solid var(--card-border)',
-                            background: 'var(--background)', color: 'var(--foreground)',
-                            borderRadius: 3, fontSize: 12, fontFamily: 'inherit', width: 180,
-                          }}
-                        />
-                        <select value={minOrder} onChange={e => setMinOrder(e.target.value as MinOrder)} style={{
-                          padding: '8px 10px', border: '1px solid var(--card-border)',
-                          background: 'var(--background)', color: 'var(--foreground)',
-                          borderRadius: 3, fontSize: 12, fontFamily: 'inherit',
-                        }}>
-                          <option value="monto">Ordenar: importe</option>
-                          <option value="ejec">Ordenar: % ejecutado</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)' }}>
-                      {ministeriosSorted.map((m, i) => {
-                        const maxMonto = ministeriosSorted[0].obligacionesReconocidas;
-                        return (
-                          <div key={m.seccion} style={{
-                            padding: '13px 18px', borderBottom: i === ministeriosSorted.length - 1 ? 0 : '1px solid var(--rule)',
-                            display: 'grid', gridTemplateColumns: '200px 1fr 120px 70px', alignItems: 'center', gap: 14, fontSize: 13.5,
-                          }}>
-                            <div style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.descripcion}</div>
-                            <div style={{ height: 4, background: 'var(--background)', borderRadius: 1, overflow: 'hidden', border: '1px solid var(--rule)' }}>
-                              <div style={{ height: '100%', width: `${(m.obligacionesReconocidas / maxMonto) * 100}%`, background: 'var(--foreground)', transition: 'width 1s ease' }} />
-                            </div>
-                            <div className="mono" style={{ textAlign: 'right', fontWeight: 600, fontSize: 12 }}>{formatEUR(m.obligacionesReconocidas, true)}</div>
-                            <div className="mono" style={{ textAlign: 'right', color: 'var(--muted)', fontSize: 12 }}>{m.tasaEjecucion.toFixed(1)}%</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {result?.meta && (
-                      <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 10 }}>
-                        Fuente: {result.meta.source} · {new Date(result.meta.lastUpdated).toLocaleString('es-ES')}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
-          </>
-        ) : null
+        </section>
       )}
 
-      {/* TAB: Evolución (usa datos históricos — comparador por secciones) */}
-      {tab === 'evolucion' && (
-        loadingHist ? <div style={{ padding: '80px 0', display: 'flex', justifyContent: 'center' }}><PageLoader /></div>
-        : errorHist ? (
-          <div style={{ padding: '80px 24px', textAlign: 'center' }}>
-            <p style={{ color: 'var(--bad)', marginBottom: 16 }}>{errorHist}</p>
-            <button onClick={() => { setHistorico(null); loadHist(); }} style={{ padding: '10px 20px', background: 'var(--accent)', color: '#fff', border: 0, borderRadius: 4, fontWeight: 700, cursor: 'pointer' }}>Reintentar</button>
+      <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 64px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, fontSize: 13, lineHeight: 1.6, color: 'var(--muted-strong)' }}>
+          <div>
+            <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Qué significa cada columna</div>
+            <p style={{ margin: '0 0 6px' }}><strong>Créditos definitivos:</strong> importe máximo que se puede gastar, tras las modificaciones aprobadas durante el año.</p>
+            <p style={{ margin: '0 0 6px' }}><strong>Obligaciones reconocidas:</strong> gasto ya realizado y reconocido como deuda de la Administración (el servicio se ha prestado o la entrega se ha producido).</p>
+            <p style={{ margin: 0 }}><strong>Pagos realizados:</strong> parte de esas obligaciones que ya se ha pagado.</p>
           </div>
-        ) : hist ? (
-          <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)' }}>
-            <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-              {/* Totales */}
-              <div className="eyebrow" style={{ marginBottom: 10 }}>Comparador histórico</div>
-              <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 24px', letterSpacing: '-0.02em' }}>
-                Obligaciones reconocidas por ejercicio
-              </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)', overflow: 'hidden', marginBottom: 32 }}>
-                {hist.años.map((año, i) => {
-                  const t = hist.totales[año];
-                  const prev = i > 0 ? hist.totales[hist.años[i - 1]] : null;
-                  const delta = prev ? ((t.obligacionesReconocidas - prev.obligacionesReconocidas) / prev.obligacionesReconocidas) * 100 : null;
-                  return (
-                    <div key={año} style={{ padding: '24px', borderRight: i < 2 ? '1px solid var(--card-border)' : 0 }}>
-                      <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Gasto total {año}</div>
-                      <div className="mono" style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>
-                        {formatEUR(t.obligacionesReconocidas, true)}
-                      </div>
-                      <div className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>Tasa ejec.: {t.tasaEjecucion.toFixed(1)}%</div>
-                      {delta !== null && (
-                        <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
-                          {delta >= 0 ? '+' : ''}{delta.toFixed(1)}% vs {hist.años[i - 1]}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Chart de barras CSS puro */}
-              <div className="eyebrow" style={{ marginBottom: 8 }}>Top 10 secciones por gasto 2024</div>
-              <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 20px', letterSpacing: '-0.02em' }}>
-                Comparativa de gasto real ejecutado (miles de millones €)
-              </h3>
-              <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)', padding: '28px 24px' }}>
-                {hist.secciones.slice(0, 10).map(s => {
-                  const globalMax = Math.max(...hist.secciones.slice(0, 10).flatMap(sec =>
-                    hist.años.map(a => sec.datos[a]?.obligacionesReconocidas ?? 0)
-                  ));
-                  return (
-                    <div key={s.seccion} style={{ marginBottom: 20 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{s.descripcion}</div>
-                      {hist.años.map((año, ai) => {
-                        const val = s.datos[año]?.obligacionesReconocidas ?? 0;
-                        const COLORS = ['#6b6b66', '#4a4a45', 'var(--accent)'];
-                        return (
-                          <div key={año} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 100px', gap: 8, alignItems: 'center', marginBottom: 4 }}>
-                            <span className="mono" style={{ fontSize: 10, color: 'var(--muted)' }}>{año}</span>
-                            <div style={{ height: 10, background: 'var(--background)', borderRadius: 1, overflow: 'hidden', border: '1px solid var(--rule)' }}>
-                              <div style={{ height: '100%', width: val ? `${(val / globalMax) * 100}%` : '0%', background: COLORS[ai], transition: 'width 1s ease' }} />
-                            </div>
-                            <span className="mono" style={{ fontSize: 11, textAlign: 'right', color: 'var(--muted-strong)' }}>
-                              {val ? formatEUR(val, true) : '—'}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-                <div style={{ display: 'flex', gap: 20, marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--rule)' }}>
-                  {hist.años.map((año, i) => (
-                    <div key={año} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ width: 12, height: 4, background: ['#6b6b66', '#4a4a45', 'var(--accent)'][i], borderRadius: 1 }} />
-                      <span className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>{año}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        ) : null
-      )}
-
-      {/* TAB: Tabla comparativa */}
-      {tab === 'comparador' && (
-        loadingHist ? <div style={{ padding: '80px 0', display: 'flex', justifyContent: 'center' }}><PageLoader /></div>
-        : hist ? (
-          <section style={{ padding: '48px 0' }}>
-            <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>Tabla comparativa · Todas las secciones</div>
-              <h2 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 24px', letterSpacing: '-0.02em' }}>
-                Gasto real ejecutado por sección · 2022 · 2023 · 2024
-              </h2>
-              <div style={{ border: '1px solid var(--card-border)', borderRadius: 4, background: 'var(--card)', overflow: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
-                  <thead>
-                    <tr style={{ background: 'var(--background)' }}>
-                      <th style={comparTh}>Sección</th>
-                      {hist.años.map(a => <th key={a} style={{ ...comparTh, textAlign: 'right' }}>{a}</th>)}
-                      <th style={{ ...comparTh, textAlign: 'right' }}>Δ 22→24</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {hist.secciones.map((s, i) => {
-                      const v22 = s.datos[2022]?.obligacionesReconocidas ?? null;
-                      const v24 = s.datos[2024]?.obligacionesReconocidas ?? null;
-                      const varPct = v22 && v24 ? ((v24 - v22) / v22) * 100 : null;
-                      return (
-                        <tr key={s.seccion} style={{ borderBottom: i === hist.secciones.length - 1 ? 0 : '1px solid var(--rule)' }}>
-                          <td style={{ padding: '13px 18px', fontWeight: 500 }}>
-                            <span className="mono" style={{ fontSize: 10, color: 'var(--muted)', marginRight: 8 }}>{s.seccion}</span>
-                            {s.descripcion}
-                          </td>
-                          {hist.años.map(año => (
-                            <td key={año} style={{ padding: '13px 18px', textAlign: 'right', fontFamily: 'var(--font-mono), monospace', fontSize: 13 }}>
-                              {s.datos[año] ? formatEUR(s.datos[año].obligacionesReconocidas, true) : <span style={{ color: 'var(--muted)' }}>—</span>}
-                            </td>
-                          ))}
-                          <td className="mono" style={{
-                            padding: '13px 18px', textAlign: 'right', fontWeight: 700, fontSize: 12,
-                            color: 'var(--muted)',
-                          }}>
-                            {varPct !== null ? `${varPct >= 0 ? '+' : ''}${varPct.toFixed(1)}%` : '—'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 12 }}>
-                Fuente: IGAE · Obligaciones Reconocidas Netas · Euros corrientes sin deflactar
-              </p>
-            </div>
-          </section>
-        ) : null
-      )}
+          <div>
+            <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Fuente</div>
+            <p style={{ margin: '0 0 6px' }}>
+              IGAE, <a href={IGAE_EXTRACTO_PAGINA} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>Extracto de ejecución del Presupuesto. Administración General del Estado</a>,
+              cuadros «Estado de ejecución. Secciones» y «Estado de ejecución. Capítulos» (fichero {datos.fichero}).
+            </p>
+            <p style={{ margin: 0 }}>
+              La IGAE publica los importes en miles de euros; aquí se muestran en millones. La comparación
+              con {ejercicio - 1} usa el mismo periodo que publica la IGAE en ese extracto. Al cargar cada fichero
+              se comprueba que la suma de partidas coincide con el total oficial.
+            </p>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
