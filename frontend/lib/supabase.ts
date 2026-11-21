@@ -18,22 +18,6 @@ export function getServerSupabase() {
 }
 
 // DB row types matching the Supabase schema
-export interface BudgetExecutionRow {
-  id?: number;
-  ejercicio: number;
-  seccion: string;
-  seccion_desc: string;
-  programa: string;
-  programa_desc: string;
-  cred_iniciales: number;
-  cred_modificaciones: number;
-  cred_definitivos: number;
-  obligaciones_reconocidas: number;
-  obligaciones_pagadas: number;
-  tasa_ejecucion: number;
-  synced_at?: string;
-}
-
 export interface ContratoRow {
   id: string;
   titulo: string;
@@ -46,18 +30,6 @@ export interface ContratoRow {
   adjudicatario?: string | null;
   enlace: string;
   synced_at?: string;
-}
-
-export interface BudgetSummaryRow {
-  ejercicio: number;
-  seccion: string;
-  seccion_desc: string;
-  cred_iniciales: number;
-  cred_modificaciones: number;
-  cred_definitivos: number;
-  obligaciones_reconocidas: number;
-  obligaciones_pagadas: number;
-  tasa_ejecucion: number;
 }
 
 export interface AlertSubscriptionRow {

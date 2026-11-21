@@ -4,6 +4,7 @@ import AlertaSubscribeForm from '@/components/ui/AlertaSubscribeForm';
 const COLS = [
   { h: 'Secciones', links: [
     { l: 'Impuestómetro', href: '/impuestometro' },
+    { l: 'Presupuesto', href: '/presupuesto' },
     { l: 'Contratos', href: '/contratos' },
     { l: 'Subvenciones', href: '/subvenciones' },
     { l: 'Datasets', href: '/datasets' },

@@ -37,13 +37,12 @@ frontend/
 ├── app/
 │   ├── layout.tsx          # Root layout: ThemeProvider + Navbar + Footer + SEO
 │   ├── page.tsx            # Home: hero, KPI bar, features grid, top 5 partidas
-│   ├── presupuesto/page.tsx  # Dashboard completo IGAE (client component)
+│   ├── presupuesto/page.tsx  # Ejecución del Presupuesto del Estado (server, datos igae_ejecucion)
 │   ├── contratos/page.tsx    # Feed licitaciones PLACE (client component)
 │   ├── subvenciones/page.tsx # Placeholder BDNS (server component)
 │   ├── datasets/page.tsx     # Open data + API docs (server component)
 │   ├── api/
-│   │   ├── presupuesto/route.ts        # Lee de Supabase → fallback IGAE
-│   │   ├── presupuesto/detalle/route.ts # Filas raw por ejercicio/sección
+│   │   ├── presupuesto/route.ts        # Último extracto IGAE en JSON (igae_ejecucion)
 │   │   ├── contratos/route.ts          # Lee de Supabase → fallback PLACE Atom feed
 │   │   ├── cron/sync/route.ts          # Llamado por Vercel Cron (requiere CRON_SECRET)
 │   │   └── revalidate/route.ts         # Invalida caché (requiere REVALIDATE_SECRET)
@@ -53,36 +52,32 @@ frontend/
 ├── components/
 │   ├── layout/  Navbar.tsx, Footer.tsx, ThemeProvider.tsx
 │   ├── ui/      KpiCard.tsx, Badge.tsx, Spinner.tsx, SectionHeader.tsx
-│   ├── charts/  BudgetBarChart.tsx, BudgetDonut.tsx, EjecucionGauge.tsx
-│   └── dashboard/ BudgetTable.tsx, EjercicioSelector.tsx
 ├── lib/
 │   ├── supabase.ts          # Clientes público y servidor + tipos DB
 │   ├── cache.ts             # Caché en memoria (se pierde en cold start)
-│   ├── constants.ts         # URLs IGAE, TTLs, MINISTERIOS_MAP, CURRENT_EJERCICIO=2024
-│   ├── types.ts             # BudgetExecution, Contract, Dataset, KpiMetric...
+│   ├── constants.ts         # Feed PLACE, TTLs
+│   ├── types.ts             # Contract, Dataset, KpiMetric...
 │   ├── formatters.ts        # formatEUR, formatPercent, formatNumber, formatDateES
-│   ├── data/igae.ts         # Fetch CSV del IGAE → transformBudgetRows → fallback seed
-│   ├── transformers/budget.ts # transformBudgetRows, summarizeBudget
+│   ├── igae/extracto.ts     # Lector del Excel del extracto mensual de la IGAE
+│   ├── igae/consultas.ts    # getUltimaEjecucion()
 │   └── sync/
-│       ├── budget.ts        # syncBudgetToSupabase(ejercicio)
+│       ├── igae.ts          # syncIgaeExtracto(): descarga y carga el extracto nuevo
 │       └── contratos.ts     # syncContratosToSupabase(contracts[])
 └── vercel.json              # Cron: /api/cron/sync cada día a las 06:00 UTC
 ```
 
 ## Esquema Supabase
 
-**Tablas:** `budget_executions`, `contratos`, `sync_log`
-**Vista:** `budget_summary_by_seccion` (agrega por ejercicio+sección, úsala para el dashboard)
+**Tablas:** `igae_ejecucion`, `contratos`, `subvenciones`, `alert_subscriptions`, `sync_log`
+(`budget_executions`, `subvenciones_stats` y la vista `budget_summary_by_seccion` son restos sin uso)
 
 Columnas snake_case en BD → camelCase en TypeScript vía mapeo manual (ver `lib/supabase.ts`).
 RLS activado: lectura pública anónima, escritura solo con `SUPABASE_SECRET_KEY`.
 
 ## Flujo de datos
-1. Vercel Cron llama `/api/cron/sync` → `syncBudgetToSupabase(2024)` → upsert en Supabase
-2. Las API routes leen de **Supabase primero** (rápido, persistente)
-3. Si Supabase está vacío → fetch directo de IGAE/PLACE
-4. Si IGAE falla → datos seed hardcodeados en `lib/data/igae.ts:getSeedData()`
-5. Caché en memoria (1h presupuesto, 30min contratos) evita hits repetidos a Supabase
+1. Vercel Cron llama `/api/cron/sync` → `syncIgaeExtracto()`, contratos PLACE y subvenciones BDNS → upsert en Supabase
+2. Las páginas y API routes leen de Supabase. Si no hay datos, muestran «no disponible»: nunca cifras de ejemplo
+3. Caché en memoria (30 min contratos) evita hits repetidos a Supabase
 
 ## Variables de entorno necesarias
 ```
@@ -104,7 +99,6 @@ NEXT_PUBLIC_BASE_URL              # https://gastopublico.es en prod
 ## Estado de funcionalidades
 
 ### ✅ Fase 1 — Completada
-- [x] Presupuesto IGAE: dashboard con gráficos, tabla, selector de ejercicio (2022–2024)
 - [x] Contratos PLACE: feed en tiempo real parseado del Atom feed
 - [x] Impuestómetro: retención IRPF (algoritmo AEAT 2026) + cotizaciones 2026, reparto COFOG IGAE 2024
 - [x] Datasets: página open data con enlaces a CSV/JSON y docs de API
@@ -117,7 +111,7 @@ NEXT_PUBLIC_BASE_URL              # https://gastopublico.es en prod
       Flujo: Supabase (cron) → BDNS directo. Cron sincroniza 500 concesiones por ejecución.
       Agregados calculados en vivo sobre lo sincronizado (ver «Estado real de los datos»).
       Archivos: `lib/data/bdns.ts`, `lib/sync/subvenciones.ts`, `app/api/subvenciones/route.ts`.
-- [ ] **Comparador histórico** en `/presupuesto`: la UI existe pero no hay datos reales (ver arriba).
+- [x] **Ejecución presupuestaria real** (21/11/2026): extracto mensual IGAE, ver sección propia.
 - [x] **Fix cron**: todos los syncs corren en paralelo (`Promise.all`), `maxDuration=300`.
       `syncContratosToSupabase()` ya no da timeout al correr junto con budget y BDNS.
 - [x] **Fallback IGAE eliminado** (17/11/2026): los JSON de ejemplo no eran datos oficiales.
@@ -152,10 +146,10 @@ retiraron y redirigen (308) a `/` desde `next.config.ts`. El bot de X se elimin�
 - Auditoría completa del 17/11/2026: informes en el PR #2 («fix/datos-verificados»).
 
 ## Estado real de los datos (auditoría 17/11/2026)
-- **Presupuesto (IGAE): NO hay datos reales.** Los CSV del IGAE nunca se han cargado; las 42
-  filas de `budget_executions` y los antiguos JSON de `public/data` eran datos de ejemplo
-  inventados. `/presupuesto` muestra «Datos no disponibles» (`DATOS_VERIFICADOS = false`) y
-  `/api/presupuesto*` devuelven 503. Pendiente: implementar la carga real y vaciar la tabla.
+- **Presupuesto (IGAE): datos reales desde nov 2026.** Fuente: «Extracto de ejecución del
+  Presupuesto. Administración General del Estado» (mensual, fichero «Cuadros» .xlsx). Ver
+  la sección «Ejecución presupuestaria (IGAE)» más abajo. La antigua tabla `budget_executions`
+  (datos de ejemplo inventados) está vacía y ya no se usa.
 - **Subvenciones (BDNS):** los agregados se calculan en vivo sobre las concesiones
   sincronizadas (no es el total nacional). El parámetro `anio` de la API no filtra por año:
   la columna `ejercicio` no es fiable. `tipo_beneficiario` guarda el nivel de la
@@ -168,6 +162,22 @@ retiraron y redirigen (308) a `/` desde `next.config.ts`. El bot de X se elimin�
 
 `alert_subscriptions` no debe tener políticas RLS públicas: las rutas `/api/alertas/*` usan
 `SUPABASE_SECRET_KEY`.
+
+## Ejecución presupuestaria (IGAE)
+- **Lector:** `lib/igae/extracto.ts` (sin dependencias: lee el ZIP/XML del .xlsx con `node:zlib`).
+  Lee las hojas `GTOS 001` (secciones) y `GTOS 004` (capítulos), ejercicio actual y mismo
+  periodo del anterior. Rechaza el fichero si la suma de partidas no coincide exactamente
+  con TOTALES o si los totales de ambas hojas difieren. Importes en **miles de euros**.
+- **Tabla:** `igae_ejecucion` (PK ejercicio, mes, nivel, nombre). Migración
+  `supabase/migrations/20261121000000_igae_ejecucion.sql`.
+- **Carga automática:** `lib/sync/igae.ts` → `syncIgaeExtracto()` desde el cron diario. Busca el
+  mes siguiente al último cargado; enlaces sacados de la página de la IGAE o, si no, con el
+  nombre `EXTRACTO_<MES>_<AÑO>_EXCEL.xlsx`. **No verificado aún desde Vercel**: revisar
+  `sync_log` (source `IGAE_EXTRACTO`) a final de mes.
+- **Carga manual:** `node scripts/igae-a-json.mts <fichero.xlsx>` vuelca las filas en JSON
+  (Node ≥ 22.18). Sirve para verificar ficheros y cargar a mano si la descarga falla.
+- **Consulta/UI:** `lib/igae/consultas.ts` → `getUltimaEjecucion()`; `/presupuesto`,
+  `/api/presupuesto` y el bloque «top 5 secciones» de la portada.
 
 ## Lo que NO hacer
 - No instalar Prisma ni otro ORM — usamos Supabase client directamente

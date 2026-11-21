@@ -21,9 +21,9 @@ const FUENTES = [
   {
     nombre: 'IGAE — Intervención General de la Administración del Estado',
     url: 'https://www.igae.pap.hacienda.gob.es/',
-    dato: 'Contabilidad nacional de las AAPP (gasto, intereses) y clasificación funcional del gasto (COFOG). La ejecución presupuestaria mensual del Estado no está cargada todavía',
-    frecuencia: 'Actualización manual cuando se publica',
-    donde: 'portada, /deuda, /impuestometro, /presupuesto (sin datos)',
+    dato: 'Extracto mensual de ejecución del Presupuesto del Estado (cuadros por secciones y capítulos); contabilidad nacional de las AAPP (gasto, intereses) y clasificación funcional del gasto (COFOG)',
+    frecuencia: 'Ejecución presupuestaria: mensual, según el calendario de la IGAE (carga automática diaria si hay extracto nuevo). Resto: manual cuando se publica',
+    donde: 'portada, /presupuesto, /deuda, /impuestometro',
   },
   {
     nombre: 'Banco de España',
@@ -221,7 +221,7 @@ export default function MetodologiaPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 980 }}>
             {[
-              { t: 'Ejercicio presupuestario', d: 'Salvo indicación expresa, el año que acompaña a una cifra es el ejercicio presupuestario, no el año natural de pago. Se distingue entre crédito inicial, crédito definitivo y obligaciones reconocidas; la etiqueta de cada tabla indica cuál se está mostrando.' },
+              { t: 'Ejercicio presupuestario', d: 'Salvo indicación expresa, el año que acompaña a una cifra es el ejercicio presupuestario, no el año natural de pago. Se distingue entre crédito definitivo, obligaciones reconocidas y pagos; la etiqueta de cada tabla indica cuál se está mostrando. La ejecución es acumulada desde el 1 de enero hasta la fecha de corte del extracto.' },
               { t: 'Agregación por sección', d: 'El presupuesto se agrega por sección presupuestaria, la unidad de la clasificación orgánica de los Presupuestos Generales del Estado. No se reagrupan secciones en categorías temáticas propias.' },
               { t: 'Tasa de ejecución', d: 'Obligaciones reconocidas divididas entre crédito definitivo del mismo ejercicio y sección.' },
               { t: 'Contratos y subvenciones', d: 'Son copias parciales que se amplían cada día: los totales, medias y porcentajes se calculan sobre las filas sincronizadas y se indica cuántas son. En contratos, el importe es el presupuesto base de licitación sin impuestos, no el importe adjudicado.' },
@@ -250,7 +250,7 @@ export default function MetodologiaPage() {
               { t: 'Perímetros distintos', d: 'La ejecución presupuestaria cubre el Estado; las cifras de contabilidad nacional (IGAE, Banco de España, Eurostat) cubren el conjunto de las Administraciones Públicas. No son directamente comparables y cada bloque indica su perímetro.' },
               { t: 'Desfase de publicación', d: 'Las fuentes publican con retraso respecto al periodo al que se refieren y pueden revisar sus cifras en ediciones posteriores.' },
               { t: 'Copias parciales', d: 'Contratos y subvenciones no son el total publicado por PLACSP o la BDNS: son las filas que el proceso diario ha descargado desde que empezó a funcionar.' },
-              { t: 'Presupuesto del Estado sin datos', d: 'La sección /presupuesto no muestra cifras: las que había no procedían de la IGAE. Se publicarán cuando se carguen desde la fuente oficial.' },
+              { t: 'Carga del extracto de la IGAE', d: 'Cada fichero mensual se lee de las hojas «GTOS 001» (secciones) y «GTOS 004» (capítulos). Solo se guarda si la suma de partidas coincide exactamente con el total oficial en todas las columnas y si los totales por secciones y por capítulos son iguales. La IGAE publica en miles de euros.' },
             ].map(c => (
               <div key={c.t} style={{ padding: '18px 20px', background: 'var(--card)', border: '1px solid var(--card-border)', borderRadius: 4 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 7 }}>{c.t}</div>

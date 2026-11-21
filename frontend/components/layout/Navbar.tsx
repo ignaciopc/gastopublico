@@ -20,6 +20,7 @@ const NAV: NavEntry[] = [
   {
     label: 'Gasto público',
     items: [
+      { href: '/presupuesto', label: 'Presupuesto del Estado' },
       { href: '/contratos', label: 'Contratos' },
       { href: '/subvenciones', label: 'Subvenciones' },
       { href: '/deuda', label: 'Deuda pública' },

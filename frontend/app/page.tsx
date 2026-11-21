@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import { fetchIgaeBudget } from '@/lib/data/igae';
-import { summarizeBudget } from '@/lib/transformers/budget';
+import { getUltimaEjecucion } from '@/lib/igae/consultas';
 import { supabase } from '@/lib/supabase';
-import { CURRENT_EJERCICIO } from '@/lib/constants';
 import { formatEUR } from '@/lib/formatters';
 import type { ContratoRow } from '@/lib/supabase';
 import type { Contract } from '@/lib/types';
@@ -28,13 +26,12 @@ const FEATURES = [
 const PARTIDA_COLORS = ['var(--accent)', '#8a1428', '#6b6b66', '#3a3a35', '#1a1a18'];
 
 async function getData() {
-  const [rows, contratosResult] = await Promise.allSettled([
-    fetchIgaeBudget(CURRENT_EJERCICIO),
+  const [ejecucionResult, contratosResult] = await Promise.allSettled([
+    getUltimaEjecucion(),
     supabase.from('contratos').select('*').order('fecha_publicacion', { ascending: false }).limit(5),
   ]);
 
-  const budgetRows = rows.status === 'fulfilled' ? rows.value : [];
-  const summary = summarizeBudget(budgetRows, CURRENT_EJERCICIO);
+  const ejecucion = ejecucionResult.status === 'fulfilled' ? ejecucionResult.value : null;
 
   const contratos: Contract[] = contratosResult.status === 'fulfilled' && contratosResult.value.data
     ? (contratosResult.value.data as ContratoRow[]).map(r => ({
@@ -47,7 +44,7 @@ async function getData() {
       }))
     : [];
 
-  return { summary, contratos };
+  return { ejecucion, contratos };
 }
 
 // ── Mini stat for the speed strip ──────────────────────────────────────────
@@ -67,8 +64,8 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 }
 
 export default async function HomePage() {
-  const { summary, contratos } = await getData();
-  const top5 = summary.bySeccion.slice(0, 5);
+  const { ejecucion, contratos } = await getData();
+  const top5 = ejecucion?.secciones.slice(0, 5) ?? [];
   const maxVal = top5[0]?.obligacionesReconocidas ?? 1;
 
   return (
@@ -461,21 +458,22 @@ export default async function HomePage() {
       {top5.length > 0 && (
         <section style={{ padding: '48px 0', borderBottom: '1px solid var(--rule)' }}>
           <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-            <div className="eyebrow" style={{ marginBottom: 6 }}>Ejercicio {CURRENT_EJERCICIO} · Datos IGAE</div>
+            <div className="eyebrow" style={{ marginBottom: 6 }}>Presupuesto del Estado · IGAE · hasta el {ejecucion?.etiquetaCorte}</div>
             <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-              Las cinco secciones con más obligaciones reconocidas — {CURRENT_EJERCICIO}
+              Las cinco secciones con más obligaciones reconocidas en {ejecucion?.ejercicio}
             </h2>
             <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 24px' }}>
-              Obligaciones reconocidas por sección presupuestaria del Estado.
-              {EJERCICIOS_PRORROGADOS.includes(CURRENT_EJERCICIO) && ` En ${CURRENT_EJERCICIO} rigió el presupuesto de ${ULTIMO_EJERCICIO_APROBADO} prorrogado.`}
-              {' '}El porcentaje indica la tasa de ejecución: obligaciones reconocidas sobre crédito definitivo.
+              Gasto acumulado desde el 1 de enero según el extracto mensual de ejecución de la IGAE.
+              {ejecucion && EJERCICIOS_PRORROGADOS.includes(ejecucion.ejercicio) && ` En ${ejecucion.ejercicio} rige el presupuesto de ${ULTIMO_EJERCICIO_APROBADO} prorrogado.`}
+              {' '}El porcentaje es obligaciones reconocidas sobre créditos definitivos.{' '}
+              <Link href="/presupuesto" style={{ color: 'var(--accent)' }}>Ver todas las secciones →</Link>
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {top5.map((s, i) => {
                 const pct = Math.round((s.obligacionesReconocidas / maxVal) * 100);
                 return (
-                  <div key={s.seccion} style={{ display: 'grid', gridTemplateColumns: '200px 1fr 140px 80px', gap: 16, alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, color: 'var(--muted-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.descripcion}</span>
+                  <div key={s.nombre} style={{ display: 'grid', gridTemplateColumns: '200px 1fr 140px 80px', gap: 16, alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--muted-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.nombre}</span>
                     <div style={{ background: 'var(--card-border)', borderRadius: 2, height: 8, overflow: 'hidden' }}>
                       <div style={{ width: `${pct}%`, height: '100%', background: PARTIDA_COLORS[i], borderRadius: 2 }} />
                     </div>
@@ -483,7 +481,7 @@ export default async function HomePage() {
                       {formatEUR(s.obligacionesReconocidas)}
                     </span>
                     <span className="mono" style={{ fontSize: 12, color: 'var(--muted)', textAlign: 'right' }}>
-                      {s.tasaEjecucion.toFixed(1)}%
+                      {s.creditosDefinitivos > 0 ? ((s.obligacionesReconocidas / s.creditosDefinitivos) * 100).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—'} %
                     </span>
                   </div>
                 );
