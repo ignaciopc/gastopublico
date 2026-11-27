@@ -13,9 +13,10 @@ const CABECERAS = { 'User-Agent': 'GastoPublico.es (+https://gastopublico.es/met
 // Enlaces del Excel publicados en la página. Si la página no los sirve en el HTML,
 // se prueba con el nombre con el que la IGAE publica el fichero
 // (p. ej. «EXTRACTO_SEPTIEMBRE_2026_EXCEL.xlsx»).
-async function enlacesExcel(): Promise<string[]> {
+async function enlacesExcel(diag: string[]): Promise<string[]> {
   try {
     const res = await fetch(IGAE_EXTRACTO_PAGINA, { headers: CABECERAS, signal: AbortSignal.timeout(20_000) });
+    diag.push(`página ${res.status}`);
     if (!res.ok) return [];
     const html = await res.text();
     const urls = new Set<string>();
@@ -23,8 +24,10 @@ async function enlacesExcel(): Promise<string[]> {
       const href = m[1].replace(/&amp;/g, '&');
       urls.add(href.startsWith('http') ? href : new URL(href, IGAE_ORIGEN).toString());
     }
+    diag.push(`${urls.size} enlaces .xls`);
     return [...urls];
-  } catch {
+  } catch (err) {
+    diag.push(`página error: ${err instanceof Error ? err.message : String(err)}`);
     return [];
   }
 }
@@ -42,13 +45,16 @@ function candidatos(anio: number, mes: number, publicados: string[]): string[] {
   return [...new Set([...dePagina, ...base])];
 }
 
-async function descargar(url: string): Promise<Buffer | null> {
+async function descargar(url: string, diag: string[]): Promise<Buffer | null> {
+  const nombre = decodeURIComponent(url.split('/').pop() ?? url);
   try {
     const res = await fetch(url, { headers: CABECERAS, signal: AbortSignal.timeout(30_000) });
-    if (!res.ok) return null;
+    if (!res.ok) { diag.push(`${nombre}: ${res.status}`); return null; }
     const buf = Buffer.from(await res.arrayBuffer());
-    return buf.subarray(0, 2).toString() === 'PK' ? buf : null; // .xlsx = ZIP
-  } catch {
+    if (buf.subarray(0, 2).toString() !== 'PK') { diag.push(`${nombre}: no es .xlsx (${res.headers.get('content-type')})`); return null; } // .xlsx = ZIP
+    return buf;
+  } catch (err) {
+    diag.push(`${nombre}: ${err instanceof Error ? err.message : String(err)}`);
     return null;
   }
 }
@@ -87,9 +93,10 @@ export async function syncIgaeExtracto(): Promise<{ cargado: string | null; fila
     return { cargado: null, filas: 0, error: null };
   }
 
-  const publicados = await enlacesExcel();
+  const diag: string[] = [];
+  const publicados = await enlacesExcel(diag);
   for (const url of candidatos(anio, mes, publicados)) {
-    const buf = await descargar(url);
+    const buf = await descargar(url, diag);
     if (!buf) continue;
     try {
       const extracto = parseExtracto(buf);
@@ -107,12 +114,13 @@ export async function syncIgaeExtracto(): Promise<{ cargado: string | null; fila
     }
   }
 
-  // La IGAE publica el extracto del mes M a finales de M+1. Si han pasado más de 75 días
-  // desde el cierre del mes (unos 45 después de la fecha prevista) y no aparece, se
-  // registra el fallo en sync_log para detectarlo.
+  // La IGAE publica el extracto del mes M hacia finales de M+1. A partir de 20 días después
+  // del cierre del mes, cada intento sin resultado se registra en sync_log con el detalle
+  // de lo probado (estado HTTP de la página y de cada nombre de fichero) para poder
+  // distinguir «aún no publicado» de «la descarga falla».
   const cierreMes = Date.UTC(anio, mes, 0);
-  if (hoy.getTime() - cierreMes > 75 * 86_400_000) {
-    const msg = `No se encontró el extracto ${mes}/${anio} (${publicados.length} enlaces .xls en la página)`;
+  if (hoy.getTime() - cierreMes > 20 * 86_400_000) {
+    const msg = `Extracto ${mes}/${anio} no disponible · ${diag.join(' · ')}`.slice(0, 1000);
     await logSync(db, anio, 0, false, msg, started);
     return { cargado: null, filas: 0, error: msg };
   }
